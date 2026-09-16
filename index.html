@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CodEsp — Entorno de desarrollo</title>
+
+    <link rel="stylesheet" href="css/core.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/plugins.css">
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- CABECERA PRINCIPAL -->
+    <header class="top">
+
+        <div class="brand">
+            <span class="brand-mark">CE</span>
+
+            <span>CodEsp</span>
+
+            <small>ENTORNO 0.2</small>
+        </div>
+
+
+        <!-- NAVEGACIÓN -->
+        <nav id="main-nav">
+
+            <button data-view="editor">
+                Editor
+            </button>
+
+            <button data-view="plugins">
+                Plugins
+            </button>
+
+            <button data-view="archivos">
+                Archivos
+            </button>
+
+            <button data-view="ayuda">
+                Ayuda
+            </button>
+
+        </nav>
+
+
+        <!-- ACCIONES -->
+        <div class="top-actions">
+
+            <button
+                id="runTop"
+                class="primary">
+                ▶ Ejecutar
+            </button>
+
+            <button
+                id="menuBtn"
+                class="icon-btn">
+                ☰
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!--
+        AQUÍ SE CARGAN DINÁMICAMENTE LAS VISTAS.
+
+        Ejemplo:
+
+        views/editor.html
+        views/plugins.html
+        views/archivos.html
+        views/ayuda.html
+    -->
+    <div id="workspace"></div>
+
+</div>
+
+
+<!-- Selector de archivos CodEsp -->
+<input
+    id="filePicker"
+    type="file"
+    accept=".codesp,text/plain"
+    hidden
+>
+
+
+<!-- Selector múltiple de proyecto -->
+<input
+    id="projectPicker"
+    type="file"
+    accept=".codesp,text/plain"
+    multiple
+    hidden
+>
+
+
+<!-- Aplicación -->
+<script
+    type="module"
+    src="js/app.js">
+</script>
+
+</body>
+</html>
