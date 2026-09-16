@@ -1,0 +1,136 @@
+<section class="view generic-view help">
+
+
+    <div class="page-head">
+
+        <div>
+
+            <div class="eyebrow">
+                DOCUMENTACIÓN
+            </div>
+
+            <h1>
+                CodEsp 0.2
+            </h1>
+
+            <p>
+                Lenguaje técnico en español para
+                automatización y solicitudes HTTP.
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="help-grid">
+
+
+        <!-- =================================================
+             SINTAXIS
+        ================================================== -->
+
+        <article class="panel">
+
+            <div class="panel-title">
+                SINTAXIS
+            </div>
+
+            <pre>
+definir nombre = "Ana"
+definir edad = 17
+
+si edad >= 18:
+    mostrar "Acceso"
+
+respuesta = solicitar GET "https://ejemplo.com/api"
+
+si respuesta.estado == 200:
+    mostrar respuesta.json
+            </pre>
+
+        </article>
+
+
+
+        <!-- =================================================
+             HTTP
+        ================================================== -->
+
+        <article class="panel">
+
+            <div class="panel-title">
+                HTTP
+            </div>
+
+            <pre>
+respuesta = solicitar POST url:
+    encabezados:
+        contenido = "application/json"
+    enviar:
+        nombre = "Ana"
+
+mostrar respuesta.estado
+mostrar respuesta.json
+            </pre>
+
+        </article>
+
+
+
+        <!-- =================================================
+             SESIONES
+        ================================================== -->
+
+        <article class="panel">
+
+            <div class="panel-title">
+                SESIONES
+            </div>
+
+            <pre>
+usar sesiones
+
+sesion = crear sesion
+
+login = solicitar POST url:
+    sesion: sesion
+    enviar:
+        usuario = "demo"
+
+perfil = solicitar GET perfil:
+    sesion: sesion
+            </pre>
+
+        </article>
+
+
+
+        <!-- =================================================
+             PLUGINS
+        ================================================== -->
+
+        <article class="panel">
+
+            <div class="panel-title">
+                PLUGINS
+            </div>
+
+            <pre>
+plugin "utilidades":
+    definir version = "1.0.0"
+
+    funcion limpiar(texto):
+        devolver texto.trim()
+
+    funcion saludo(nombre):
+        devolver "Hola " + nombre
+            </pre>
+
+        </article>
+
+
+    </div>
+
+</section>
