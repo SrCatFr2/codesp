@@ -1,0 +1,91 @@
+.plugin-layout {
+    display: grid;
+    grid-template-columns: 390px minmax(0, 1fr);
+    gap: 10px;
+}
+
+.plugin-list,
+.plugin-editor,
+.files-table {
+    border: 1px solid #111;
+}
+
+.plugin-item {
+    padding: 10px;
+    border-bottom: 1px solid #16181a;
+    cursor: pointer;
+}
+
+.plugin-item:hover,
+.plugin-item.active {
+    background: #353a3e;
+}
+
+.plugin-item strong {
+    display: block;
+}
+
+.plugin-item small {
+    color: #808a90;
+}
+
+.plugin-badge {
+    float: right;
+    padding: 2px 4px;
+    border: 1px solid #596269;
+    color: #aab4ba;
+    font: 9px Consolas, monospace;
+}
+
+.plugin-code {
+    padding: 12px;
+    color: #adb8be;
+    white-space: pre-wrap;
+    font: 12px/18px Consolas, monospace;
+}
+
+.plugin-actions {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+    border-top: 1px solid #151719;
+}
+
+.files-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 100px;
+    gap: 10px;
+    padding: 9px;
+    border-bottom: 1px solid #17191b;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.help article {
+    min-height: 200px;
+}
+
+.help pre {
+    padding: 12px;
+    margin: 0;
+    white-space: pre-wrap;
+    color: #aeb8be;
+    font: 12px/19px Consolas, monospace;
+}
+
+@media (max-width: 850px) {
+    .plugin-layout,
+    .help-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 500px) {
+    .files-row {
+        grid-template-columns: 1fr;
+    }
+}
