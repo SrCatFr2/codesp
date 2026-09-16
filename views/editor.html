@@ -1,0 +1,298 @@
+<section class="view editor-view">
+
+    <!-- =====================================================
+         BARRA DE HERRAMIENTAS
+    ====================================================== -->
+
+    <div class="toolbar">
+
+        <button id="newFile">
+            Nuevo
+        </button>
+
+        <button id="openFile">
+            Abrir
+        </button>
+
+        <button id="saveFile">
+            Guardar
+        </button>
+
+
+        <span class="sep"></span>
+
+
+        <button
+            id="runCode"
+            class="primary">
+            ▶ Ejecutar
+        </button>
+
+        <button id="stopCode">
+            ■ Detener
+        </button>
+
+
+        <span class="sep"></span>
+
+
+        <button id="importCurl">
+            cURL → CodEsp
+        </button>
+
+        <button id="exportPython">
+            CodEsp → Python
+        </button>
+
+
+        <span
+            class="toolbar-status"
+            id="compileState">
+            LISTO
+        </span>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ÁREA PRINCIPAL
+    ====================================================== -->
+
+    <div class="editor-grid">
+
+
+        <!-- =================================================
+             PROYECTO
+        ================================================== -->
+
+        <aside class="panel project-panel">
+
+            <div class="panel-title">
+                PROYECTO
+            </div>
+
+
+            <div class="project-name">
+                ▣ MiProyecto
+            </div>
+
+
+            <div id="fileTree"></div>
+
+
+            <div class="panel-footer">
+
+                <button id="newPlugin">
+                    + Plugin .codesp
+                </button>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =================================================
+             EDITOR
+        ================================================== -->
+
+        <main class="code-panel">
+
+
+            <!-- PESTAÑA -->
+            <div class="tabbar">
+
+                <span id="currentTab">
+                    principal.codesp
+                </span>
+
+                <span class="tab-path">
+                    /proyecto
+                </span>
+
+            </div>
+
+
+
+            <!-- EDITOR -->
+            <div class="editor-wrap">
+
+
+                <!-- NÚMEROS DE LÍNEA -->
+
+                <div
+                    id="gutter"
+                    class="gutter">
+                </div>
+
+
+
+                <!-- CAPA DEL EDITOR -->
+
+                <div class="code-stack">
+
+
+                    <!--
+                        Capa de resaltado.
+
+                        El textarea está encima,
+                        permitiendo edición real mientras
+                        este PRE muestra los colores.
+                    -->
+
+                    <pre
+                        id="highlight"
+                        aria-hidden="true">
+                    </pre>
+
+
+                    <!--
+                        Editor real
+                    -->
+
+                    <textarea
+                        id="code"
+                        spellcheck="false"
+                        autocapitalize="off"
+                        autocomplete="off">
+                    </textarea>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ESTADO DEL EDITOR -->
+
+            <div class="editor-status">
+
+                <span id="cursorPos">
+                    Ln 1 : Col 1
+                </span>
+
+                <span>
+                    UTF-8
+                </span>
+
+                <span>
+                    CodEsp
+                </span>
+
+                <span id="tokenState">
+                    0 tokens
+                </span>
+
+            </div>
+
+        </main>
+
+
+
+        <!-- =================================================
+             INSPECTOR
+        ================================================== -->
+
+        <aside class="panel inspector">
+
+
+            <div class="panel-title">
+                INSPECTOR
+            </div>
+
+
+            <!-- VARIABLES -->
+
+            <div class="inspect-section">
+
+                <b>
+                    VARIABLES
+                </b>
+
+                <div id="variables">
+                    Sin ejecución.
+                </div>
+
+            </div>
+
+
+
+            <!-- SOLICITUD -->
+
+            <div class="inspect-section">
+
+                <b>
+                    SOLICITUD
+                </b>
+
+                <div id="requestInfo">
+                    Sin solicitud.
+                </div>
+
+            </div>
+
+
+
+            <!-- AST -->
+
+            <div class="inspect-section">
+
+                <b>
+                    AST
+                </b>
+
+                <pre id="astInfo">
+Sin AST.
+                </pre>
+
+            </div>
+
+
+        </aside>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CONSOLA INFERIOR
+    ====================================================== -->
+
+    <div class="bottom">
+
+
+        <!-- TABS -->
+
+        <div class="bottom-tabs">
+
+            <button
+                class="active"
+                data-panel="console">
+                CONSOLA
+            </button>
+
+            <button
+                data-panel="network">
+                RED
+            </button>
+
+            <button
+                data-panel="errors">
+                ERRORES
+            </button>
+
+        </div>
+
+
+        <!-- CONTENIDO -->
+
+        <div
+            id="bottomContent"
+            class="bottom-content">
+        </div>
+
+
+    </div>
+
+</section>
