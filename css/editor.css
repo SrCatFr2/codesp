@@ -1,0 +1,351 @@
+.editor-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.toolbar {
+    height: 42px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    background: #2d3033;
+    border-bottom: 1px solid #101112;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.toolbar button {
+    flex: none;
+}
+
+.sep {
+    height: 24px;
+    margin: 0 4px;
+    border-left: 1px solid #111;
+    border-right: 1px solid #555;
+}
+
+.toolbar-status {
+    margin-left: auto;
+    color: #94a1a8;
+    font: 11px Consolas, monospace;
+}
+
+.editor-grid {
+    height: calc(100% - 285px);
+    min-height: 320px;
+    display: grid;
+    grid-template-columns: 190px minmax(300px, 1fr) 230px;
+}
+
+.project-panel {
+    position: relative;
+}
+
+.project-name {
+    padding: 9px 10px;
+    color: #e1e3e5;
+}
+
+.project-item {
+    padding: 5px 12px;
+    color: #aeb5ba;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-item:hover,
+.project-item.active {
+    background: #3b4146;
+    color: #fff;
+}
+
+.panel-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 8px;
+    border-top: 1px solid #111;
+}
+
+.code-panel {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #181a1c;
+}
+
+.tabbar {
+    height: 30px;
+    flex: none;
+    padding: 7px 10px;
+    background: #303438;
+    border-bottom: 1px solid #0b0c0d;
+    color: #e0e2e4;
+    font: 11px Consolas, monospace;
+}
+
+.tab-path {
+    float: right;
+    color: #6f787e;
+}
+
+.editor-wrap {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.gutter {
+    width: 48px;
+    flex: none;
+    padding: 10px 9px 20px 0;
+    background: #202326;
+    color: #626a70;
+    text-align: right;
+    user-select: none;
+    overflow: hidden;
+    font: 13px/20px Consolas, monospace;
+}
+
+.code-stack {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.code-stack pre,
+.code-stack textarea {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 10px 12px 20px;
+    border: 0;
+    font: 13px/20px Consolas, "Courier New", monospace;
+    letter-spacing: .1px;
+    white-space: pre;
+    tab-size: 4;
+    overflow: auto;
+}
+
+.code-stack pre {
+    z-index: 1;
+    pointer-events: none;
+    color: #cbd0d4;
+}
+
+.code-stack textarea {
+    z-index: 2;
+    resize: none;
+    outline: none;
+    background: transparent;
+    color: transparent;
+    caret-color: #fff;
+    -webkit-text-fill-color: transparent;
+}
+
+.tok-key {
+    color: #8eb5d1;
+}
+
+.tok-str {
+    color: #b7c88b;
+}
+
+.tok-num {
+    color: #c8ad82;
+}
+
+.tok-com {
+    color: #68737a;
+}
+
+.tok-bool {
+    color: #c49ac8;
+}
+
+.tok-method {
+    color: #d4bd8a;
+}
+
+.tok-var {
+    color: #d4d8da;
+}
+
+.tok-fn {
+    color: #9dbb9d;
+}
+
+.tok-op {
+    color: #b3bbc1;
+}
+
+.editor-status {
+    height: 25px;
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    padding: 5px 10px;
+    background: #2d3134;
+    border-top: 1px solid #0d0e0f;
+    color: #899298;
+    font: 10px Consolas, monospace;
+}
+
+.inspector {
+    border-right: 0;
+    overflow: auto;
+}
+
+.inspect-section {
+    padding: 10px;
+    border-bottom: 1px solid #151719;
+}
+
+.inspect-section b {
+    color: #7f8a91;
+    font: 10px Consolas, monospace;
+}
+
+.inspect-section div {
+    margin-top: 7px;
+    color: #b9bec2;
+    line-height: 19px;
+    word-break: break-word;
+}
+
+.inspect-section pre {
+    max-height: 160px;
+    margin: 7px 0 0;
+    overflow: auto;
+    color: #8f9da5;
+    font: 10px/15px Consolas, monospace;
+}
+
+.bottom {
+    height: 243px;
+    flex: none;
+    background: #1d2022;
+    border-top: 1px solid #0c0d0e;
+}
+
+.bottom-tabs {
+    height: 30px;
+    display: flex;
+    background: #2b2f32;
+    border-bottom: 1px solid #101112;
+}
+
+.bottom-tabs button {
+    padding: 7px 13px;
+    border: 0;
+    border-right: 1px solid #111;
+    background: #303438;
+    color: #899299;
+    font: 10px Consolas, monospace;
+}
+
+.bottom-tabs button.active {
+    background: #25282b;
+    color: #e1e3e6;
+}
+
+.bottom-content {
+    height: 213px;
+    padding: 9px;
+    overflow: auto;
+    color: #adb5ba;
+    font: 12px/18px Consolas, monospace;
+}
+
+.log-ok {
+    color: #a9bdab;
+}
+
+.log-info {
+    color: #a7b6c2;
+}
+
+.log-err {
+    color: #c98f8f;
+}
+
+.net-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 70px 70px;
+    gap: 8px;
+    padding: 5px 2px;
+    border-bottom: 1px solid #303438;
+}
+
+.net-row b {
+    font-weight: normal;
+}
+
+.value-chip {
+    display: inline-block;
+    margin: 1px;
+    padding: 1px 4px;
+    border: 1px solid #4a5055;
+    font-size: 10px;
+}
+
+.error-line {
+    background: rgba(150, 70, 70, .18);
+}
+
+@media (max-width: 850px) {
+    .editor-grid {
+        grid-template-columns: 1fr;
+        height: calc(100% - 285px);
+    }
+
+    .project-panel,
+    .inspector {
+        display: none;
+    }
+
+    .toolbar-status {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .toolbar {
+        height: 48px;
+    }
+
+    .editor-grid {
+        height: calc(100% - 325px);
+    }
+
+    .bottom {
+        height: 283px;
+    }
+
+    .bottom-content {
+        height: 253px;
+    }
+
+    .gutter {
+        width: 40px;
+    }
+
+    .code-stack pre,
+    .code-stack textarea {
+        font-size: 12px;
+    }
+
+    .tab-path {
+        display: none;
+    }
+}
