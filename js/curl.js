@@ -1,392 +1,388 @@
-/*
- * Convertidor cURL → CodEsp
- *
- * Intenta conservar:
- * - método
- * - URL
- * - encabezados
- * - datos
- * - cookies
- * - parámetros
- */
+// ==========================================
+// CodEsp — Conversor cURL → CodEsp
+// ==========================================
 
-export function curlToCodEsp(input) {
+export function convertirCurl(curl) {
 
-    const source =
-        normalizeCurl(input);
-
-    if (
-        !/^curl(?:\s|$)/i.test(source)
-    ) {
-        throw new Error(
-            "El texto proporcionado no parece ser un comando cURL."
-        );
+    if (!curl || !String(curl).trim()) {
+        throw new Error("No se recibió ningún comando cURL.");
     }
 
-    const method =
-        getMethod(source);
-
-    const url =
-        getURL(source);
-
-    if (!url) {
-        throw new Error(
-            "No se encontró una URL válida en el cURL."
-        );
-    }
-
-    const headers =
-        getHeaders(source);
-
-    const cookies =
-        getCookies(source);
-
-    const data =
-        getData(source);
-
-    const parameters =
-        getParameters(url);
-
-    let cleanURL =
-        removeQuery(url);
-
-    /*
-     * Si existe -G / --get,
-     * los datos se convierten en parámetros.
-     */
-
-    const isGet =
-        /\s(?:-G|--get)(?:\s|$)/i.test(source);
-
-    let output =
-        `respuesta = solicitar ${method} "${cleanURL}"`;
-
-    const sections = [];
-
-    /*
-     * PARÁMETROS
-     */
-
-    if (
-        isGet &&
-        Object.keys(parameters).length
-    ) {
-
-        sections.push(
-            createKeyValueBlock(
-                "parametros",
-                parameters
-            )
-        );
-    }
-
-    /*
-     * ENCABEZADOS
-     */
-
-    const allHeaders = {
-        ...headers
-    };
-
-    if (cookies) {
-        allHeaders.cookie =
-            cookies;
-    }
-
-    if (
-        Object.keys(allHeaders).length
-    ) {
-
-        sections.push(
-            createKeyValueBlock(
-                "encabezados",
-                allHeaders
-            )
-        );
-    }
-
-    /*
-     * CUERPO
-     */
-
-    if (
-        data !== null &&
-        !isGet
-    ) {
-
-        sections.push(
-            createKeyValueBlock(
-                "enviar",
-                {
-                    cuerpo:
-                        data
-                }
-            )
-        );
-    }
-
-    if (sections.length) {
-        output += ":\n";
-        output += sections.join("\n");
-    }
-
-    return output;
-}
-
-
-/*
- * Normalizar continuaciones:
- *
- * curl \
- *   -H "..."
- *
- * → curl -H "..."
- */
-
-function normalizeCurl(input) {
-
-    return input
+    curl = String(curl)
         .replace(/\\\r?\n/g, " ")
         .replace(/\r?\n/g, " ")
-        .replace(/\s+/g, " ")
         .trim();
-}
 
-
-/*
- * Método.
- */
-
-function getMethod(source) {
-
-    const explicit =
-        source.match(
-            /(?:-X|--request)\s+["']?([A-Za-z]+)["']?/i
-        );
-
-    if (explicit) {
-        return explicit[1].toUpperCase();
+    if (!/^curl\s+/i.test(curl)) {
+        throw new Error("El texto no parece ser un comando cURL.");
     }
 
-    if (
-        /(?:-d|--data|--data-raw|--data-binary|--data-urlencode)\s+/i
-            .test(source)
-    ) {
-        return "POST";
-    }
+    const tokens = tokenizarCurl(curl);
 
-    return "GET";
-}
-
-
-/*
- * URL.
- */
-
-function getURL(source) {
-
-    /*
-     * Primero URL entre comillas.
-     */
-
-    const quoted =
-        source.match(
-            /["'](https?:\/\/[^"']+)["']/i
-        );
-
-    if (quoted) {
-        return quoted[1];
-    }
-
-    /*
-     * Después URL sin comillas.
-     */
-
-    const plain =
-        source.match(
-            /(https?:\/\/[^\s'"]+)/i
-        );
-
-    return plain
-        ? plain[1]
-        : null;
-}
-
-
-/*
- * Encabezados.
- */
-
-function getHeaders(source) {
-
+    let url = null;
+    let method = "GET";
     const headers = {};
+    let body = null;
 
-    const regex =
-        /(?:-H|--header)\s+(?:"([^"]*)"|'([^']*)'|([^\s]+))/gi;
+    for (let i = 0; i < tokens.length; i++) {
 
-    for (
-        const match of source.matchAll(regex)
-    ) {
+        const token = tokens[i];
 
-        const value =
-            match[1] ??
-            match[2] ??
-            match[3] ??
-            "";
+        // ------------------------------------------
+        // URL
+        // ------------------------------------------
 
-        const index =
-            value.indexOf(":");
-
-        if (index === -1) {
+        if (
+            !url &&
+            /^https?:\/\//i.test(token)
+        ) {
+            url = token;
             continue;
         }
 
-        const key =
-            value
-                .slice(0, index)
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-zA-Z0-9_ÁÉÍÓÚáéíóúÑñ]/g, "_");
+        // ------------------------------------------
+        // MÉTODO
+        // ------------------------------------------
 
-        const headerValue =
-            value
-                .slice(index + 1)
-                .trim();
+        if (
+            token === "-X" ||
+            token === "--request"
+        ) {
+            method = (tokens[++i] || "GET").toUpperCase();
+            continue;
+        }
 
-        headers[key] =
-            headerValue;
-    }
+        // ------------------------------------------
+        // HEADERS
+        // ------------------------------------------
 
-    return headers;
-}
+        if (
+            token === "-H" ||
+            token === "--header"
+        ) {
+            const header = tokens[++i];
 
+            if (!header) continue;
 
-/*
- * Cookies.
- */
+            const separator = header.indexOf(":");
 
-function getCookies(source) {
+            if (separator !== -1) {
 
-    const match =
-        source.match(
-            /(?:-b|--cookie)\s+(?:"([^"]*)"|'([^']*)'|([^\s]+))/i
-        );
+                const name = header
+                    .slice(0, separator)
+                    .trim();
 
-    return (
-        match?.[1] ??
-        match?.[2] ??
-        match?.[3] ??
-        null
-    );
-}
+                const value = header
+                    .slice(separator + 1)
+                    .trim();
 
-
-/*
- * Datos.
- */
-
-function getData(source) {
-
-    const match =
-        source.match(
-            /(?:-d|--data|--data-raw|--data-binary|--data-urlencode)\s+(?:"([\s\S]*?)"|'([\s\S]*?)'|([^\s]+))/i
-        );
-
-    if (!match) {
-        return null;
-    }
-
-    return (
-        match[1] ??
-        match[2] ??
-        match[3]
-    );
-}
-
-
-/*
- * Query string → objeto.
- */
-
-function getParameters(url) {
-
-    const result = {};
-
-    try {
-
-        const parsed =
-            new URL(url);
-
-        parsed.searchParams.forEach(
-            (value, key) => {
-                result[key] = value;
+                headers[name] = value;
             }
-        );
 
-    } catch {
-        return {};
+            continue;
+        }
+
+        // ------------------------------------------
+        // DATOS POST
+        // ------------------------------------------
+
+        if (
+            token === "-d" ||
+            token === "--data" ||
+            token === "--data-raw" ||
+            token === "--data-binary"
+        ) {
+            body = tokens[++i] || "";
+            continue;
+        }
+
+        // ------------------------------------------
+        // DATA URL ENCODED
+        // ------------------------------------------
+
+        if (token === "--data-urlencode") {
+            const data = tokens[++i] || "";
+
+            if (body) {
+                body += "&" + data;
+            } else {
+                body = data;
+            }
+
+            continue;
+        }
+
+        // ------------------------------------------
+        // GET CON DATOS
+        // ------------------------------------------
+
+        if (token === "-G" || token === "--get") {
+            method = "GET";
+            continue;
+        }
+
+        // ------------------------------------------
+        // COOKIE
+        // ------------------------------------------
+
+        if (
+            token === "-b" ||
+            token === "--cookie"
+        ) {
+            const cookie = tokens[++i];
+
+            if (cookie) {
+                headers["Cookie"] = cookie;
+            }
+
+            continue;
+        }
+
+        // ------------------------------------------
+        // USER AGENT
+        // ------------------------------------------
+
+        if (
+            token === "-A" ||
+            token === "--user-agent"
+        ) {
+            const agent = tokens[++i];
+
+            if (agent) {
+                headers["User-Agent"] = agent;
+            }
+
+            continue;
+        }
     }
 
-    return result;
+    if (!url) {
+        throw new Error("No se encontró la URL del cURL.");
+    }
+
+    // Si hay body y no se especificó método,
+    // cURL normalmente estaría haciendo POST.
+    if (body !== null && method === "GET") {
+        method = "POST";
+    }
+
+    // ------------------------------------------
+    // GENERAR CODESP
+    // ------------------------------------------
+
+    let codigo = "";
+
+    codigo += `respuesta = solicitar ${method} ${formatearValor(url)}`;
+
+    if (
+        Object.keys(headers).length > 0 ||
+        body !== null
+    ) {
+        codigo += ":";
+    }
+
+    // Headers
+
+    if (Object.keys(headers).length > 0) {
+
+        codigo += "\n    encabezados:";
+
+        for (const [name, value] of Object.entries(headers)) {
+
+            codigo +=
+                `\n        ${nombreSeguro(name)} = ${formatearValor(value)}`;
+        }
+    }
+
+    // Body
+
+    if (body !== null) {
+
+        codigo += "\n    enviar:";
+
+        const datos = convertirBody(body);
+
+        for (const [name, value] of Object.entries(datos)) {
+
+            codigo +=
+                `\n        ${nombreSeguro(name)} = ${formatearValor(value)}`;
+        }
+    }
+
+    codigo += "\n";
+
+    return codigo;
 }
 
 
-/*
- * Quitar query string.
- */
+// ==========================================
+// TOKENIZADOR cURL
+// ==========================================
 
-function removeQuery(url) {
+function tokenizarCurl(texto) {
 
-    try {
+    const tokens = [];
 
-        const parsed =
-            new URL(url);
+    let actual = "";
+    let comilla = null;
 
-        parsed.search = "";
+    for (let i = 0; i < texto.length; i++) {
 
-        return parsed.toString();
+        const char = texto[i];
 
-    } catch {
+        // Dentro de comillas
 
-        return url.split("?")[0];
+        if (comilla) {
+
+            if (char === comilla) {
+                comilla = null;
+            } else {
+                actual += char;
+            }
+
+            continue;
+        }
+
+        // Inicio de comillas
+
+        if (char === '"' || char === "'") {
+            comilla = char;
+            continue;
+        }
+
+        // Espacio
+
+        if (/\s/.test(char)) {
+
+            if (actual) {
+                tokens.push(actual);
+                actual = "";
+            }
+
+            continue;
+        }
+
+        actual += char;
     }
+
+    if (actual) {
+        tokens.push(actual);
+    }
+
+    return tokens;
 }
 
 
-/*
- * Crear bloque CodEsp.
- */
+// ==========================================
+// CONVERTIR BODY
+// ==========================================
 
-function createKeyValueBlock(
-    name,
-    values
-) {
+function convertirBody(body) {
 
-    const lines = [
-        `    ${name}:`
-    ];
+    body = String(body).trim();
 
-    for (
-        const [key, value]
-        of Object.entries(values)
+    // JSON
+
+    if (
+        (body.startsWith("{") && body.endsWith("}")) ||
+        (body.startsWith("[") && body.endsWith("]"))
     ) {
 
-        lines.push(
-            `        ${key} = ${quote(value)}`
-        );
+        try {
+
+            const json = JSON.parse(body);
+
+            if (
+                json &&
+                typeof json === "object" &&
+                !Array.isArray(json)
+            ) {
+                return json;
+            }
+
+        } catch {
+            // Si no es JSON válido,
+            // se trata como texto normal.
+        }
     }
 
-    return lines.join("\n");
+    // application/x-www-form-urlencoded
+
+    const resultado = {};
+
+    if (body.includes("=")) {
+
+        for (const parte of body.split("&")) {
+
+            const index = parte.indexOf("=");
+
+            if (index === -1) continue;
+
+            const key = decodeURIComponent(
+                parte.slice(0, index)
+            );
+
+            const value = decodeURIComponent(
+                parte.slice(index + 1)
+            );
+
+            resultado[key] = value;
+        }
+
+        if (Object.keys(resultado).length > 0) {
+            return resultado;
+        }
+    }
+
+    // Body como texto
+
+    return {
+        datos: body
+    };
 }
 
 
-/*
- * Escapar cadenas.
- */
+// ==========================================
+// IDENTIFICADORES CODESP
+// ==========================================
 
-function quote(value) {
+function nombreSeguro(nombre) {
 
-    return JSON.stringify(
-        String(value)
-    );
+    let resultado = String(nombre)
+        .trim()
+        .replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9_]/g, "_");
+
+    if (/^[0-9]/.test(resultado)) {
+        resultado = "_" + resultado;
+    }
+
+    return resultado || "dato";
+}
+
+
+// ==========================================
+// VALORES CODESP
+// ==========================================
+
+function formatearValor(valor) {
+
+    if (valor === null) {
+        return "nulo";
+    }
+
+    if (typeof valor === "boolean") {
+        return valor ? "verdadero" : "falso";
+    }
+
+    if (typeof valor === "number") {
+        return String(valor);
+    }
+
+    const texto = String(valor)
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\r/g, "\\r")
+        .replace(/\n/g, "\\n");
+
+    return `"${texto}"`;
 }
