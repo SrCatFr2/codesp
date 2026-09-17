@@ -5,29 +5,16 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-    <meta
-        name="description"
-        content="CodEsp — Entorno de desarrollo y lenguaje de programación técnico en español."
-    >
+    <meta name="theme-color" content="#eaf8ff">
 
-    <meta name="theme-color" content="#167eb2">
-
-    <title>CodEsp</title>
-
-    <!-- =====================================================
-         CSS
-         ===================================================== -->
+    <title>CodEsp IDE</title>
 
     <link rel="stylesheet" href="./css/core.css">
     <link rel="stylesheet" href="./css/editor.css">
     <link rel="stylesheet" href="./css/plugins.css">
-
-    <!-- =====================================================
-         PREVENIR FLASH DE TEMA
-         ===================================================== -->
 
     <script>
         (() => {
@@ -42,387 +29,376 @@
 
 <body>
 
-    <!-- =====================================================
-         APP
-         ===================================================== -->
+<div id="app">
 
-    <div id="app">
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
 
-        <!-- =================================================
-             BARRA SUPERIOR
-             ================================================= -->
+    <header class="top">
 
-        <header class="top">
+        <div class="brand">
 
-            <div class="brand">
-
-                <div class="brand-mark">
-                    C
-                </div>
-
-                <div class="brand-text">
-                    <strong>CodEsp</strong>
-                    <span>ENTORNO DE DESARROLLO</span>
-                </div>
-
+            <div class="brand-orb">
+                <span>&lt;/&gt;</span>
             </div>
 
-
-            <!-- =============================================
-                 NAVEGACIÓN
-                 ============================================= -->
-
-            <nav id="mainNav">
-
-                <button
-                    class="nav-btn active"
-                    data-view="editor"
-                    type="button"
-                >
-                    <span>▣</span>
-                    Editor
-                </button>
-
-                <button
-                    class="nav-btn"
-                    data-view="plugins"
-                    type="button"
-                >
-                    <span>◇</span>
-                    Plugins
-                </button>
-
-                <button
-                    class="nav-btn"
-                    data-view="archivos"
-                    type="button"
-                >
-                    <span>▤</span>
-                    Archivos
-                </button>
-
-                <button
-                    class="nav-btn"
-                    data-view="ayuda"
-                    type="button"
-                >
-                    <span>?</span>
-                    Ayuda
-                </button>
-
-            </nav>
-
-
-            <!-- =============================================
-                 ACCIONES SUPERIORES
-                 ============================================= -->
-
-            <div class="top-actions">
-
-                <button
-                    id="runTop"
-                    class="top-run"
-                    type="button"
-                    title="Ejecutar programa"
-                >
-                    ▶
-                    <span>Ejecutar</span>
-                </button>
-
-                <button
-                    id="themeToggle"
-                    class="icon-btn"
-                    type="button"
-                    title="Cambiar tema"
-                    aria-label="Cambiar tema"
-                >
-                    ☾
-                </button>
-
-                <button
-                    id="mobileMenu"
-                    class="icon-btn mobile-menu"
-                    type="button"
-                    title="Abrir menú"
-                    aria-label="Abrir menú"
-                    aria-expanded="false"
-                >
-                    ☰
-                </button>
-
+            <div class="brand-text">
+                <strong>CodEsp</strong>
+                <span>Lenguaje técnico en español</span>
             </div>
 
-        </header>
+        </div>
+
+        <nav id="mainNav">
+
+            <button
+                class="nav-btn active"
+                data-view="editor"
+            >
+                <span>⌘</span>
+                Editor
+            </button>
+
+            <button
+                class="nav-btn"
+                data-view="plugins"
+            >
+                <span>◇</span>
+                Plugins
+            </button>
+
+            <button
+                class="nav-btn"
+                data-view="archivos"
+            >
+                <span>▱</span>
+                Archivos
+            </button>
+
+            <button
+                class="nav-btn"
+                data-view="ayuda"
+            >
+                <span>?</span>
+                Ayuda
+            </button>
+
+        </nav>
+
+        <div class="top-actions">
+
+            <button
+                id="runTop"
+                class="top-run"
+                title="Ejecutar código"
+            >
+                <span>▶</span>
+                Ejecutar
+            </button>
+
+            <button
+                id="themeToggle"
+                class="icon-button"
+                title="Cambiar tema"
+            >
+                ◐
+            </button>
+
+            <button
+                id="mobileMenu"
+                class="icon-button mobile-only"
+                title="Menú"
+            >
+                ☰
+            </button>
+
+        </div>
+
+    </header>
 
 
-        <!-- =================================================
-             CONTENIDO
-             ================================================= -->
+    <!-- ========================================= -->
+    <!-- WORKSPACE -->
+    <!-- ========================================= -->
 
-        <main id="workspace">
+    <main id="workspace">
 
-            <!-- =============================================
-                 PANTALLA DE CARGA
-                 ============================================= -->
+        <div class="boot-screen">
 
-            <section id="bootScreen" class="boot-screen">
+            <div class="boot-orb">
+                &lt;/&gt;
+            </div>
 
-                <div class="boot-logo">
-                    C
-                </div>
+            <h1>Cargando CodEsp</h1>
 
-                <div class="boot-title">
-                    CodEsp
-                </div>
+            <p>
+                Preparando el entorno de desarrollo...
+            </p>
 
-                <div class="boot-subtitle">
-                    Iniciando entorno...
-                </div>
+            <div class="boot-loader">
+                <span></span>
+            </div>
 
-                <div class="boot-loader">
-                    <span></span>
-                </div>
+        </div>
 
-            </section>
-
-        </main>
+    </main>
 
 
-        <!-- =================================================
-             INPUTS OCULTOS
-             ================================================= -->
+    <!-- ========================================= -->
+    <!-- FILE INPUTS -->
+    <!-- ========================================= -->
 
-        <input
-            id="filePicker"
-            type="file"
-            accept=".codesp,text/plain"
-            hidden
-        >
+    <input
+        type="file"
+        id="filePicker"
+        accept=".codesp,.txt"
+        hidden
+    >
 
-        <input
-            id="projectPicker"
-            type="file"
-            accept=".codesp,text/plain"
-            multiple
-            hidden
-        >
-
-
-        <!-- =================================================
-             TOAST / NOTIFICACIONES
-             ================================================= -->
-
-        <div
-            id="toastContainer"
-            class="toast-container"
-            aria-live="polite"
-        ></div>
-
-    </div>
+    <input
+        type="file"
+        id="projectPicker"
+        accept=".json"
+        hidden
+    >
 
 
-    <!-- =====================================================
-         TEMA — NO NECESITA app.js
-         ===================================================== -->
+    <!-- ========================================= -->
+    <!-- TOASTS -->
+    <!-- ========================================= -->
 
-    <script>
-        (() => {
+    <div id="toastContainer"></div>
 
-            const root = document.documentElement;
-            const body = document.body;
+</div>
 
-            const button = document.getElementById("themeToggle");
 
-            function getTheme() {
-                return (
-                    root.dataset.theme ||
-                    localStorage.getItem("codesp_theme") ||
-                    "light"
+<!-- ============================================= -->
+<!-- GLOBAL NAVIGATION -->
+<!-- ============================================= -->
+
+<script>
+(() => {
+
+    const workspace = document.getElementById("workspace");
+    const nav = document.getElementById("mainNav");
+
+    let currentView = "editor";
+
+
+    async function loadView(viewName, updateHash = true) {
+
+        if (!workspace) return;
+
+        const allowed = [
+            "editor",
+            "plugins",
+            "archivos",
+            "ayuda"
+        ];
+
+        if (!allowed.includes(viewName)) {
+            viewName = "editor";
+        }
+
+        currentView = viewName;
+
+        if (updateHash) {
+            history.replaceState(
+                null,
+                "",
+                "#" + viewName
+            );
+        }
+
+        nav?.querySelectorAll(".nav-btn").forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.view === viewName
+            );
+
+        });
+
+        workspace.classList.add("view-changing");
+
+        try {
+
+            const response = await fetch(
+                `./views/${viewName}.html?v=0.4.0`
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `No se pudo cargar views/${viewName}.html`
                 );
             }
 
-            function updateThemeButton() {
+            const html = await response.text();
 
-                if (!button) return;
+            workspace.innerHTML = html;
 
-                const dark = getTheme() === "dark";
+            requestAnimationFrame(() => {
 
-                button.textContent = dark ? "☀" : "☾";
-
-                button.title = dark
-                    ? "Cambiar a modo claro"
-                    : "Cambiar a modo oscuro";
-
-                button.setAttribute(
-                    "aria-label",
-                    dark
-                        ? "Cambiar a modo claro"
-                        : "Cambiar a modo oscuro"
+                workspace.classList.remove(
+                    "view-changing"
                 );
-            }
 
+                workspace.classList.add(
+                    "view-visible"
+                );
 
-            function applyTheme(theme) {
-
-                if (theme === "dark") {
-
-                    root.dataset.theme = "dark";
-                    body.classList.add("dark-mode");
-
-                    localStorage.setItem(
-                        "codesp_theme",
-                        "dark"
+                setTimeout(() => {
+                    workspace.classList.remove(
+                        "view-visible"
                     );
+                }, 350);
 
-                } else {
+            });
 
-                    root.dataset.theme = "light";
-                    body.classList.remove("dark-mode");
-
-                    localStorage.setItem(
-                        "codesp_theme",
-                        "light"
-                    );
-                }
-
-                updateThemeButton();
-            }
-
-
-            if (button) {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const current = getTheme();
-
-                        applyTheme(
-                            current === "dark"
-                                ? "light"
-                                : "dark"
-                        );
-
+            document.dispatchEvent(
+                new CustomEvent(
+                    "codesp:view-loaded",
+                    {
+                        detail: {
+                            view: viewName
+                        }
                     }
+                )
+            );
+
+        } catch (error) {
+
+            workspace.classList.remove(
+                "view-changing"
+            );
+
+            workspace.innerHTML = `
+                <section class="error-page">
+
+                    <div class="error-icon">!</div>
+
+                    <h1>No se pudo cargar la vista</h1>
+
+                    <p>
+                        ${escapeHtml(error.message)}
+                    </p>
+
+                    <button
+                        class="primary"
+                        id="retryView"
+                    >
+                        Reintentar
+                    </button>
+
+                </section>
+            `;
+
+            document
+                .getElementById("retryView")
+                ?.addEventListener(
+                    "click",
+                    () => loadView(viewName)
                 );
+        }
+
+        nav?.classList.remove("mobile-open");
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    nav?.addEventListener("click", event => {
+
+        const button =
+            event.target.closest(".nav-btn");
+
+        if (!button) return;
+
+        loadView(button.dataset.view);
+
+    });
+
+
+    window.addEventListener("hashchange", () => {
+
+        const view =
+            location.hash.replace("#", "");
+
+        loadView(view || "editor", false);
+
+    });
+
+
+    document
+        .getElementById("mobileMenu")
+        ?.addEventListener("click", () => {
+
+            nav?.classList.toggle(
+                "mobile-open"
+            );
+
+        });
+
+
+    document
+        .getElementById("themeToggle")
+        ?.addEventListener("click", () => {
+
+            const dark =
+                document.documentElement.dataset.theme === "dark";
+
+            if (dark) {
+
+                delete document.documentElement.dataset.theme;
+
+                document.body.classList.remove(
+                    "dark-mode"
+                );
+
+                localStorage.removeItem(
+                    "codesp_theme"
+                );
+
+            } else {
+
+                document.documentElement.dataset.theme =
+                    "dark";
+
+                document.body.classList.add(
+                    "dark-mode"
+                );
+
+                localStorage.setItem(
+                    "codesp_theme",
+                    "dark"
+                );
+
             }
 
-
-            applyTheme(getTheme());
-
-        })();
-    </script>
+        });
 
 
-    <!-- =====================================================
-         MENÚ MÓVIL — NO NECESITA app.js
-         ===================================================== -->
+    const initialView =
+        location.hash.replace("#", "") || "editor";
 
-    <script>
-        (() => {
+    loadView(initialView, false);
 
-            const button =
-                document.getElementById("mobileMenu");
-
-            const nav =
-                document.getElementById("mainNav");
-
-            if (!button || !nav) return;
+})();
+</script>
 
 
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const opened =
-                        nav.classList.toggle("mobile-open");
-
-                    button.setAttribute(
-                        "aria-expanded",
-                        opened ? "true" : "false"
-                    );
-
-                }
-            );
-
-
-            nav.addEventListener(
-                "click",
-                event => {
-
-                    const target =
-                        event.target.closest(
-                            ".nav-btn"
-                        );
-
-                    if (!target) return;
-
-                    nav.classList.remove(
-                        "mobile-open"
-                    );
-
-                    button.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                }
-            );
-
-        })();
-    </script>
-
-
-    <!-- =====================================================
-         NAVEGACIÓN VISUAL
-         app.js sigue siendo el encargado de cargar las vistas
-         ===================================================== -->
-
-    <script>
-        (() => {
-
-            const nav =
-                document.getElementById("mainNav");
-
-            if (!nav) return;
-
-
-            nav.addEventListener(
-                "click",
-                event => {
-
-                    const button =
-                        event.target.closest(
-                            ".nav-btn"
-                        );
-
-                    if (!button) return;
-
-                    nav
-                        .querySelectorAll(".nav-btn")
-                        .forEach(btn => {
-                            btn.classList.remove(
-                                "active"
-                            );
-                        });
-
-                    button.classList.add("active");
-
-                }
-            );
-
-        })();
-    </script>
-
-
-    <!-- =====================================================
-         APP PRINCIPAL
-         ===================================================== -->
-
-    <script
-        type="module"
-        src="./js/app.js?v=0.3.1"
-    ></script>
+<script type="module" src="./js/app.js?v=0.4.0"></script>
 
 </body>
 </html>
