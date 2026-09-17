@@ -1,493 +1,584 @@
-/*
- * Generador CodEsp → Python
- *
- * Genera Python utilizando requests.
- */
+// ==========================================
+// CodEsp — Generador CodEsp → Python
+// ==========================================
 
-export function toPython(ast) {
+export function generarPython(ast) {
 
-    const lines = [
-        "import requests",
-        "",
-        "",
-        "sesion = requests.Session()",
-        ""
-    ];
+    if (!ast || !Array.isArray(ast.body)) {
+        throw new Error("No se recibió un AST válido.");
+    }
 
-    const context = {
-        indent: 0
-    };
+    const lineas = [];
 
-    generateNodes(
-        ast.body,
-        lines,
-        context
-    );
+    // Imports necesarios
+    lineas.push("# Código generado automáticamente por CodEsp");
+    lineas.push("# ==========================================");
+    lineas.push("");
 
-    lines.push("");
+    const imports = detectarImports(ast);
 
-    return lines.join("\n");
+    if (imports.includes("requests")) {
+        lineas.push("import requests");
+    }
+
+    if (imports.includes("json")) {
+        lineas.push("import json");
+    }
+
+    if (imports.includes("time")) {
+        lineas.push("import time");
+    }
+
+    if (imports.length > 0) {
+        lineas.push("");
+    }
+
+    // Estado HTTP
+    const usaHTTP = contieneTipo(ast, "Request");
+
+    if (usaHTTP) {
+        lineas.push("sesion = requests.Session()");
+        lineas.push("");
+    }
+
+    generarBloque(ast.body, lineas, 0);
+
+    return lineas.join("\n").trim() + "\n";
 }
 
 
-function generateNodes(
-    nodes,
-    lines,
-    context
-) {
+// ==========================================
+// GENERAR BLOQUE
+// ==========================================
 
-    for (
-        const node of nodes
-    ) {
+function generarBloque(body, lineas, nivel) {
 
-        const indent =
-            "    ".repeat(
-                context.indent
-            );
+    for (const node of body) {
 
+        const indent = "    ".repeat(nivel);
 
-        /*
-         * DEFINIR / ASIGNAR
-         */
+        switch (node.type) {
 
-        if (
-            node.type === "Define" ||
-            node.type === "Assign"
-        ) {
+            // --------------------------------
+            // DEFINIR
+            // --------------------------------
 
-            lines.push(
-                indent +
-                `${node.name} = ${pythonExpression(node.expression)}`
-            );
+            case "Define":
 
-            continue;
-        }
-
-
-        /*
-         * MOSTRAR
-         */
-
-        if (node.type === "Show") {
-
-            lines.push(
-                indent +
-                `print(${pythonExpression(node.expression)})`
-            );
-
-            continue;
-        }
-
-
-        /*
-         * HTTP
-         */
-
-        if (node.type === "Request") {
-
-            const method =
-                node.method.toLowerCase();
-
-            const url =
-                pythonExpression(
-                    node.target
-                );
-
-            const argumentsList = [];
-
-            /*
-             * Parámetros.
-             */
-
-            if (
-                Object.keys(
-                    node.parameters || {}
-                ).length
-            ) {
-
-                const params =
-                    objectToPython(
-                        node.parameters
-                    );
-
-                argumentsList.push(
-                    `params=${params}`
-                );
-            }
-
-
-            /*
-             * Encabezados.
-             */
-
-            if (
-                Object.keys(
-                    node.headers || {}
-                ).length
-            ) {
-
-                const headers =
-                    objectToPython(
-                        node.headers
-                    );
-
-                argumentsList.push(
-                    `headers=${headers}`
-                );
-            }
-
-
-            /*
-             * Cuerpo.
-             */
-
-            if (node.body) {
-
-                const body =
-                    objectToPython(
-                        node.body
-                    );
-
-                argumentsList.push(
-                    `json=${body}`
-                );
-            }
-
-
-            const argumentsText =
-                argumentsList.length
-                    ? ", " +
-                      argumentsList.join(", ")
-                    : "";
-
-            lines.push(
-                indent +
-                `${node.name} = sesion.${method}(${url}${argumentsText})`
-            );
-
-            lines.push(
-                indent +
-                `${node.name}_json = None`
-            );
-
-            lines.push(
-                indent +
-                `try:`
-            );
-
-            lines.push(
-                indent +
-                `    ${node.name}_json = ${node.name}.json()`
-            );
-
-            lines.push(
-                indent +
-                `except ValueError:`
-            );
-
-            lines.push(
-                indent +
-                `    pass`
-            );
-
-            continue;
-        }
-
-
-        /*
-         * IF
-         */
-
-        if (node.type === "If") {
-
-            lines.push(
-                indent +
-                `if ${pythonExpression(node.condition)}:`
-            );
-
-            context.indent++;
-
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
-
-            context.indent--;
-
-            continue;
-        }
-
-
-        /*
-         * ELSE
-         */
-
-        if (node.type === "Else") {
-
-            lines.push(
-                indent +
-                "else:"
-            );
-
-            context.indent++;
-
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
-
-            context.indent--;
-
-            continue;
-        }
-
-
-        /*
-         * WHILE
-         */
-
-        if (node.type === "While") {
-
-            lines.push(
-                indent +
-                `while ${pythonExpression(node.condition)}:`
-            );
-
-            context.indent++;
-
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
-
-            context.indent--;
-
-            continue;
-        }
-
-
-        /*
-         * FOR
-         */
-
-        if (node.type === "For") {
-
-            lines.push(
-                indent +
-                `for ${node.variable} in ${pythonExpression(node.iterable)}:`
-            );
-
-            context.indent++;
-
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
-
-            context.indent--;
-
-            continue;
-        }
-
-
-        /*
-         * FUNCIÓN
-         */
-
-        if (node.type === "Function") {
-
-            lines.push(
-                indent +
-                `def ${node.name}(${node.params.join(", ")}):`
-            );
-
-            context.indent++;
-
-            if (!node.body.length) {
-
-                lines.push(
+                lineas.push(
                     indent +
-                    "    pass"
+                    `${node.name} = ${convertirExpresion(node.expression)}`
                 );
 
-            } else {
+                break;
 
-                generateNodes(
-                    node.body,
-                    lines,
-                    context
+
+            // --------------------------------
+            // ASIGNAR
+            // --------------------------------
+
+            case "Assign":
+
+                lineas.push(
+                    indent +
+                    `${node.name} = ${convertirExpresion(node.expression)}`
                 );
+
+                break;
+
+
+            // --------------------------------
+            // MOSTRAR
+            // --------------------------------
+
+            case "Show":
+
+                lineas.push(
+                    indent +
+                    `print(${convertirExpresion(node.expression)})`
+                );
+
+                break;
+
+
+            // --------------------------------
+            // REQUEST
+            // --------------------------------
+
+            case "Request":
+
+                generarRequest(node, lineas, nivel);
+
+                break;
+
+
+            // --------------------------------
+            // IF
+            // --------------------------------
+
+            case "If":
+
+                lineas.push(
+                    indent +
+                    `if ${convertirExpresion(node.condition)}:`
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
+
+                break;
+
+
+            // --------------------------------
+            // ELSE
+            // --------------------------------
+
+            case "Else":
+
+                lineas.push(
+                    indent + "else:"
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
+
+                break;
+
+
+            // --------------------------------
+            // WHILE
+            // --------------------------------
+
+            case "While":
+
+                lineas.push(
+                    indent +
+                    `while ${convertirExpresion(node.condition)}:`
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
+
+                break;
+
+
+            // --------------------------------
+            // FOR
+            // --------------------------------
+
+            case "For":
+
+                lineas.push(
+                    indent +
+                    `for ${node.variable} in ${convertirExpresion(node.iterable)}:`
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
+
+                break;
+
+
+            // --------------------------------
+            // FUNCIÓN
+            // --------------------------------
+
+            case "Function": {
+
+                const params = (node.params || []).join(", ");
+
+                lineas.push(
+                    indent +
+                    `def ${node.name}(${params}):`
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
+
+                break;
             }
 
-            context.indent--;
 
-            lines.push("");
+            // --------------------------------
+            // RETURN
+            // --------------------------------
 
-            continue;
-        }
+            case "Return":
 
+                lineas.push(
+                    indent +
+                    `return ${convertirExpresion(node.expression)}`
+                );
 
-        /*
-         * RETURN
-         */
-
-        if (node.type === "Return") {
-
-            lines.push(
-                indent +
-                `return ${pythonExpression(node.expression)}`
-            );
-
-            continue;
-        }
+                break;
 
 
-        /*
-         * TRY
-         */
+            // --------------------------------
+            // TRY
+            // --------------------------------
 
-        if (node.type === "Try") {
+            case "Try":
 
-            lines.push(
-                indent +
-                "try:"
-            );
+                lineas.push(
+                    indent + "try:"
+                );
 
-            context.indent++;
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
 
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
-
-            context.indent--;
-
-            continue;
-        }
+                break;
 
 
-        /*
-         * CATCH
-         */
+            // --------------------------------
+            // CATCH
+            // --------------------------------
 
-        if (node.type === "Catch") {
+            case "Catch":
 
-            lines.push(
-                indent +
-                `except Exception as ${node.variable}:`
-            );
+                lineas.push(
+                    indent +
+                    `except Exception as ${node.variable || "error"}:`
+                );
 
-            context.indent++;
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel + 1);
+                } else {
+                    lineas.push(
+                        indent + "    pass"
+                    );
+                }
 
-            generateNodes(
-                node.body,
-                lines,
-                context
-            );
+                break;
 
-            context.indent--;
 
-            continue;
+            // --------------------------------
+            // USE
+            // --------------------------------
+
+            case "Use":
+
+                // "usar sesiones" no necesita código
+                // porque Python ya utiliza requests.Session().
+                if (
+                    String(node.value)
+                        .toLowerCase()
+                        .includes("sesion")
+                ) {
+                    break;
+                }
+
+                break;
+
+
+            // --------------------------------
+            // IMPORT
+            // --------------------------------
+
+            case "Import":
+
+                lineas.push(
+                    indent +
+                    `# importar ${node.value}`
+                );
+
+                break;
+
+
+            // --------------------------------
+            // PLUGIN
+            // --------------------------------
+
+            case "Plugin":
+
+                lineas.push(
+                    indent +
+                    `# Plugin CodEsp: ${node.name}`
+                );
+
+                if (node.body?.length) {
+                    generarBloque(node.body, lineas, nivel);
+                }
+
+                break;
+
+
+            default:
+
+                lineas.push(
+                    indent +
+                    `# Nodo no soportado: ${node.type}`
+                );
         }
     }
 }
 
 
-/*
- * Expresiones.
- */
+// ==========================================
+// REQUEST HTTP
+// ==========================================
 
-function pythonExpression(
-    expression
-) {
+function generarRequest(node, lineas, nivel) {
 
-    if (
-        expression === undefined ||
-        expression === null
-    ) {
+    const indent = "    ".repeat(nivel);
+
+    const method = node.method || "GET";
+    const url = convertirExpresion(node.target);
+
+    const headers = convertirObjeto(node.headers);
+    const params = convertirObjeto(node.parameters);
+    const body = convertirObjeto(node.body);
+
+    const argumentos = [];
+
+    // Headers
+
+    if (Object.keys(headers).length > 0) {
+
+        argumentos.push(
+            `headers=${formatearPythonDict(headers)}`
+        );
+    }
+
+    // Parámetros
+
+    if (Object.keys(params).length > 0) {
+
+        argumentos.push(
+            `params=${formatearPythonDict(params)}`
+        );
+    }
+
+    // Body
+
+    if (Object.keys(body).length > 0) {
+
+        argumentos.push(
+            `json=${formatearPythonDict(body)}`
+        );
+    }
+
+    const args = argumentos.length
+        ? ", " + argumentos.join(", ")
+        : "";
+
+    lineas.push(
+        indent +
+        `${node.name} = sesion.${method.toLowerCase()}(${url}${args})`
+    );
+
+    lineas.push(
+        indent +
+        `# Estado HTTP: ${node.name}.status_code`
+    );
+}
+
+
+// ==========================================
+// EXPRESIONES
+// ==========================================
+
+function convertirExpresion(expression) {
+
+    if (expression === undefined || expression === null) {
         return "None";
     }
 
-    let result =
-        String(expression).trim();
+    let value = String(expression).trim();
 
-    result =
-        result.replace(
-            /\bverdadero\b/g,
-            "True"
-        );
+    if (!value) {
+        return "None";
+    }
 
-    result =
-        result.replace(
-            /\bfalso\b/g,
-            "False"
-        );
+    // nulo
+    value = value.replace(/\bnulo\b/g, "None");
 
-    result =
-        result.replace(
-            /\bnulo\b/g,
-            "None"
-        );
+    // verdadero / falso
+    value = value.replace(/\bverdadero\b/g, "True");
+    value = value.replace(/\bfalso\b/g, "False");
 
-    result =
-        result.replace(
-            /\brespuesta\.json\b/g,
-            "respuesta_json"
-        );
+    // operadores
+    value = value.replace(/<>/g, "!=");
+    value = value.replace(/\bY\b/g, "and");
+    value = value.replace(/\bO\b/g, "or");
+    value = value.replace(/\bNO\b/g, "not");
 
-    result =
-        result.replace(
-            /\.json\b/g,
-            "_json"
-        );
+    // Propiedades de respuestas CodEsp
 
-    result =
-        result.replace(
-            /\.trim\(\)/g,
-            ".strip()"
-        );
+    value = value.replace(
+        /([A-Za-zÁÉÍÓÚáéíóúÑñ_]\w*)\.estado\b/g,
+        "$1.status_code"
+    );
 
-    result =
-        result.replace(
-            /\.minusculas\(\)/g,
-            ".lower()"
-        );
+    value = value.replace(
+        /([A-Za-zÁÉÍÓÚáéíóúÑñ_]\w*)\.json\b/g,
+        "$1.json()"
+    );
 
-    result =
-        result.replace(
-            /\.mayusculas\(\)/g,
-            ".upper()"
-        );
+    // trim()
+    value = value.replace(
+        /\.trim\(\)/g,
+        ".strip()"
+    );
 
-    result =
-        result.replace(
-            /\.longitud\(\)/g,
-            "__len__()"
-        );
+    // minusculas()
+    value = value.replace(
+        /\.minusculas\(\)/g,
+        ".lower()"
+    );
 
-    return result;
+    // mayusculas()
+    value = value.replace(
+        /\.mayusculas\(\)/g,
+        ".upper()"
+    );
+
+    // longitud()
+    value = value.replace(
+        /longitud\((.*?)\)/g,
+        "len($1)"
+    );
+
+    return value;
 }
 
 
-/*
- * Objeto JS → literal Python.
- */
+// ==========================================
+// OBJETOS
+// ==========================================
 
-function objectToPython(
-    object
-) {
+function convertirObjeto(objeto) {
 
-    const values =
-        Object.entries(object)
-            .map(
-                ([key, value]) =>
-                    `${JSON.stringify(key)}: ${pythonExpression(value)}`
-            );
+    if (!objeto || typeof objeto !== "object") {
+        return {};
+    }
 
-    return `{${values.join(", ")}}`;
+    return objeto;
+}
+
+
+function formatearPythonDict(objeto) {
+
+    const partes = [];
+
+    for (const [key, value] of Object.entries(objeto)) {
+
+        partes.push(
+            `${JSON.stringify(key)}: ${convertirExpresion(value)}`
+        );
+    }
+
+    return `{${partes.join(", ")}}`;
+}
+
+
+// ==========================================
+// DETECTAR IMPORTS
+// ==========================================
+
+function detectarImports(ast) {
+
+    const imports = [];
+
+    if (contieneTipo(ast, "Request")) {
+        imports.push("requests");
+    }
+
+    if (
+        contieneTexto(ast, ".json") ||
+        contieneTexto(ast, "json")
+    ) {
+        imports.push("json");
+    }
+
+    if (contieneTexto(ast, "tiempo") || contieneTexto(ast, "esperar")) {
+        imports.push("time");
+    }
+
+    return imports;
+}
+
+
+// ==========================================
+// UTILIDADES AST
+// ==========================================
+
+function contieneTipo(node, tipo) {
+
+    if (!node) return false;
+
+    if (node.type === tipo) {
+        return true;
+    }
+
+    if (Array.isArray(node)) {
+
+        return node.some(
+            item => contieneTipo(item, tipo)
+        );
+    }
+
+    if (typeof node === "object") {
+
+        return Object.values(node).some(
+            value => contieneTipo(value, tipo)
+        );
+    }
+
+    return false;
+}
+
+
+function contieneTexto(node, texto) {
+
+    if (!node) return false;
+
+    if (typeof node === "string") {
+        return node.includes(texto);
+    }
+
+    if (Array.isArray(node)) {
+
+        return node.some(
+            item => contieneTexto(item, texto)
+        );
+    }
+
+    if (typeof node === "object") {
+
+        return Object.values(node).some(
+            value => contieneTexto(value, texto)
+        );
+    }
+
+    return false;
 }
