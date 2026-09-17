@@ -1,66 +1,101 @@
 <!doctype html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+        name="theme-color"
+        content="#20252b"
+    >
 
     <title>CodEsp — Entorno de desarrollo</title>
 
-    <link rel="stylesheet" href="css/core.css">
-    <link rel="stylesheet" href="css/editor.css">
-    <link rel="stylesheet" href="css/plugins.css">
+    <link
+        rel="stylesheet"
+        href="css/core.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/editor.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/plugins.css"
+    >
 </head>
 
 <body>
 
 <div id="app">
 
-    <!-- CABECERA PRINCIPAL -->
     <header class="top">
 
         <div class="brand">
             <span class="brand-mark">CE</span>
 
-            <span>CodEsp</span>
+            <span class="brand-name">
+                CodEsp
+            </span>
 
-            <small>ENTORNO 0.2</small>
+            <small>
+                ENTORNO 0.3
+            </small>
         </div>
 
 
-        <!-- NAVEGACIÓN -->
         <nav id="main-nav">
 
-            <button data-view="editor">
+            <button
+                data-view="editor"
+                class="active"
+            >
                 Editor
             </button>
 
-            <button data-view="plugins">
+            <button
+                data-view="plugins"
+            >
                 Plugins
             </button>
 
-            <button data-view="archivos">
+            <button
+                data-view="archivos"
+            >
                 Archivos
             </button>
 
-            <button data-view="ayuda">
+            <button
+                data-view="ayuda"
+            >
                 Ayuda
             </button>
 
         </nav>
 
 
-        <!-- ACCIONES -->
         <div class="top-actions">
 
             <button
                 id="runTop"
-                class="primary">
+                class="primary"
+            >
                 ▶ Ejecutar
             </button>
 
             <button
                 id="menuBtn"
-                class="icon-btn">
+                class="icon-btn"
+                aria-label="Abrir menú"
+                type="button"
+            >
                 ☰
             </button>
 
@@ -70,21 +105,24 @@
 
 
     <!--
-        AQUÍ SE CARGAN DINÁMICAMENTE LAS VISTAS.
-
-        Ejemplo:
-
-        views/editor.html
-        views/plugins.html
-        views/archivos.html
-        views/ayuda.html
+        Aquí se cargan dinámicamente:
+        editor.html
+        plugins.html
+        archivos.html
+        ayuda.html
     -->
-    <div id="workspace"></div>
+
+    <main id="workspace">
+        <div class="boot-screen">
+            <div class="boot-logo">CE</div>
+            <strong>CodEsp</strong>
+            <span>Inicializando entorno...</span>
+        </div>
+    </main>
 
 </div>
 
 
-<!-- Selector de archivos CodEsp -->
 <input
     id="filePicker"
     type="file"
@@ -92,8 +130,6 @@
     hidden
 >
 
-
-<!-- Selector múltiple de proyecto -->
 <input
     id="projectPicker"
     type="file"
@@ -103,11 +139,14 @@
 >
 
 
-<!-- Aplicación -->
+<!--
+    El parámetro ?v evita que el navegador
+    se quede usando una versión antigua.
+-->
 <script
     type="module"
-    src="js/app.js">
-</script>
+    src="js/app.js?v=0.3.1"
+></script>
 
 </body>
 </html>
