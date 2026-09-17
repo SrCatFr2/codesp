@@ -1,9 +1,3 @@
-// ============================================================
-// CodEsp
-// js/app.js
-// Control principal de la aplicación
-// ============================================================
-
 import { tokenizar } from "./lexer.js";
 import { parse } from "./parser.js";
 import { Runtime } from "./runtime.js";
@@ -16,543 +10,742 @@ import {
     renameFile
 } from "./proyecto.js";
 
-import { convertirCurl } from "./curl.js";
-import { generarPython } from "./python.js";
+import * as CurlModule from "./curl.js";
+import * as PythonModule from "./python.js";
 
 
-// ============================================================
-// ESTADO
-// ============================================================
+/* =====================================================
+   ESTADO
+===================================================== */
 
-const state = {
+let project = loadProject();
 
-    view: "editor",
+let runtime = null;
 
-    project: null,
+let currentView = null;
 
-    currentFile: "principal.codesp",
+let bottomPanel = "console";
 
-    runtime: null,
+let logs = [];
 
-    running: false,
+let networkLogs = [];
 
-    ast: null,
-
-    console: [],
-
-    errors: [],
-
-    network: [],
-
-    activePanel: "console",
-
-    lastResponse: null
-};
+let errorLogs = [];
 
 
-// ============================================================
-// DOM PRINCIPAL
-// ============================================================
+/* =====================================================
+   HELPERS
+===================================================== */
 
-const workspace =
-    document.getElementById("workspace");
-
-const nav =
-    document.getElementById("main-nav");
-
-const runTop =
-    document.getElementById("runTop");
-
-const menuBtn =
-    document.getElementById("menuBtn");
-
-const filePicker =
-    document.getElementById("filePicker");
-
-const projectPicker =
-    document.getElementById("projectPicker");
+function $(selector) {
+    return document.querySelector(selector);
+}
 
 
-// ============================================================
-// INICIO
-// ============================================================
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function showToast(message) {
+
+    const container =
+        $("#toastContainer");
+
+    if (!container) return;
+
+    const toast =
+        document.createElement("div");
+
+    toast.className = "toast";
+
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.style.opacity = "0";
+
+        toast.style.transform =
+            "translateY(8px)";
+
+        setTimeout(
+            () => toast.remove(),
+            250
+        );
+
+    }, 2500);
+
+}
+
+
+/* =====================================================
+   VIEW INIT
+===================================================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    init
+    "codesp:view-loaded",
+    event => {
+
+        currentView =
+            event.detail.view;
+
+        if (currentView === "editor") {
+            initEditor();
+        }
+
+        if (currentView === "plugins") {
+            initPlugins();
+        }
+
+        if (currentView === "archivos") {
+            initFiles();
+        }
+
+        if (currentView === "ayuda") {
+            initHelp();
+        }
+
+    }
 );
 
 
-async function init() {
+/* =====================================================
+   EDITOR
+===================================================== */
 
-    try {
+function initEditor() {
 
-        // ------------------------------------------
-        // CARGAR PROYECTO
-        // ------------------------------------------
+    project =
+        loadProject();
 
-        state.project = loadProject();
+    if (!project.active) {
 
-        // Protección contra proyecto inválido
-        if (
-            !state.project ||
-            typeof state.project !== "object"
-        ) {
-            state.project = crearProyectoSeguro();
-        }
+        const first =
+            Object.keys(project.files)[0];
 
-        // Protección contra files inexistente
-        if (
-            !state.project.files ||
-            typeof state.project.files !== "object" ||
-            Array.isArray(state.project.files)
-        ) {
-            state.project.files = {
-                "principal.codesp": ""
-            };
-        }
+        project.active =
+            first || null;
 
-        // Si no hay ningún archivo
-        if (
-            Object.keys(state.project.files).length === 0
-        ) {
-            state.project.files = {
-                "principal.codesp": ""
-            };
-        }
+        saveProject(project);
 
-        // ------------------------------------------
-        // ARCHIVO ACTIVO
-        // ------------------------------------------
-
-        const files =
-            obtenerArchivos();
-
-        if (
-            !state.project.active ||
-            !Object.prototype.hasOwnProperty.call(
-                state.project.files,
-                state.project.active
-            )
-        ) {
-            state.project.active =
-                files[0] ||
-                "principal.codesp";
-        }
-
-        state.currentFile =
-            state.project.active;
-
-        saveProject(state.project);
-
-        // ------------------------------------------
-        // CONFIGURAR UI
-        // ------------------------------------------
-
-        setupNavigation();
-
-        setupMobileMenu();
-
-        setupTopRunButton();
-
-        setupFilePickers();
-
-        // ------------------------------------------
-        // CARGAR EDITOR
-        // ------------------------------------------
-
-        await loadView("editor");
-
-    } catch (error) {
-
-        console.error(
-            "CodEsp: error durante el inicio:",
-            error
-        );
-
-        if (workspace) {
-
-            workspace.innerHTML = `
-                <section class="view generic-view">
-
-                    <div class="panel">
-
-                        <div class="panel-title">
-                            ERROR DE INICIO
-                        </div>
-
-                        <p>
-                            CodEsp no pudo iniciar correctamente.
-                        </p>
-
-                        <pre>${escapeHTML(
-                            error?.stack ||
-                            error?.message ||
-                            String(error)
-                        )}</pre>
-
-                    </div>
-
-                </section>
-            `;
-        }
-    }
-}
-
-
-// ============================================================
-// PROYECTO SEGURO
-// ============================================================
-
-function crearProyectoSeguro() {
-
-    return {
-
-        name: "MiProyecto",
-
-        version: "0.3.0",
-
-        active: "principal.codesp",
-
-        files: {
-
-            "principal.codesp":
-`# CodEsp
-
-mostrar "Hola desde CodEsp"
-`
-        }
-    };
-}
-
-
-// ============================================================
-// OBTENER ARCHIVOS
-// ============================================================
-
-function obtenerArchivos() {
-
-    if (
-        !state.project ||
-        !state.project.files ||
-        typeof state.project.files !== "object" ||
-        Array.isArray(state.project.files)
-    ) {
-        return [];
     }
 
-    return Object.keys(
-        state.project.files
-    );
+    renderFileTree();
+
+    loadActiveFile();
+
+    bindEditorToolbar();
+
+    bindEditorInput();
+
+    bindBottomPanels();
+
+    bindEditorKeyboard();
+
+    updateLineNumbers();
+
+    updateHighlight();
+
+    updateCursor();
+
+    renderConsole();
+
 }
 
 
-// ============================================================
-// NAVEGACIÓN
-// ============================================================
+/* =====================================================
+   FILE TREE
+===================================================== */
 
-function setupNavigation() {
+function renderFileTree() {
 
-    if (!nav) return;
+    const tree =
+        $("#fileTree");
 
-    nav.addEventListener(
-        "click",
-        async event => {
+    if (!tree) return;
 
-            const button =
-                event.target.closest(
-                    "[data-view]"
-                );
+    tree.innerHTML = "";
 
-            if (!button) return;
+    const files =
+        Object.keys(project.files);
 
-            await loadView(
-                button.dataset.view
-            );
+    if (!files.length) {
 
-            nav.classList.remove(
-                "mobile-open"
-            );
-        }
-    );
-}
-
-
-async function loadView(view) {
-
-    const allowed = [
-        "editor",
-        "plugins",
-        "archivos",
-        "ayuda"
-    ];
-
-    if (!allowed.includes(view)) {
-        view = "editor";
-    }
-
-    state.view = view;
-
-    try {
-
-        const response =
-            await fetch(
-                `views/${view}.html?v=0.3.2`,
-                {
-                    cache: "no-store"
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                `HTTP ${response.status}`
-            );
-        }
-
-        workspace.innerHTML =
-            await response.text();
-
-    } catch (error) {
-
-        workspace.innerHTML = `
-            <section class="view generic-view">
-
-                <div class="panel">
-
-                    <div class="panel-title">
-                        ERROR DE VISTA
-                    </div>
-
-                    <p>
-                        No se pudo cargar
-                        <b>${escapeHTML(view)}.html</b>
-                    </p>
-
-                    <pre>${escapeHTML(
-                        error.message
-                    )}</pre>
-
-                </div>
-
-            </section>
+        tree.innerHTML = `
+            <div class="empty-state">
+                No hay archivos.
+            </div>
         `;
-
-        console.error(error);
 
         return;
     }
 
-    updateNavigation();
 
-    if (view === "editor") {
-        initEditor();
-    }
+    files.forEach(file => {
 
-    if (view === "plugins") {
-        initPlugins();
-    }
+        const button =
+            document.createElement("button");
 
-    if (view === "archivos") {
-        initFiles();
-    }
-}
-
-
-// ============================================================
-// NAVEGACIÓN VISUAL
-// ============================================================
-
-function updateNavigation() {
-
-    if (!nav) return;
-
-    nav.querySelectorAll(
-        "[data-view]"
-    ).forEach(button => {
-
-        button.classList.toggle(
-            "active",
-            button.dataset.view ===
-            state.view
-        );
-
-    });
-}
-
-
-// ============================================================
-// MENÚ MÓVIL
-// ============================================================
-
-function setupMobileMenu() {
-
-    if (!menuBtn || !nav) return;
-
-    menuBtn.addEventListener(
-        "click",
-        () => {
-
-            nav.classList.toggle(
-                "mobile-open"
+        button.className =
+            "file-item" +
+            (
+                file === project.active
+                    ? " active"
+                    : ""
             );
 
-        }
-    );
-}
+        const icon =
+            file.startsWith("plugins/")
+                ? "◇"
+                : "▱";
 
+        button.innerHTML = `
+            <span class="file-icon">
+                ${icon}
+            </span>
 
-// ============================================================
-// BOTÓN EJECUTAR SUPERIOR
-// ============================================================
+            <span>
+                ${escapeHtml(
+                    file.split("/").pop()
+                )}
+            </span>
+        `;
 
-function setupTopRunButton() {
+        button.title = file;
 
-    if (!runTop) return;
+        button.addEventListener(
+            "click",
+            () => {
 
-    runTop.addEventListener(
-        "click",
-        async () => {
+                project.active = file;
 
-            // Si estamos fuera del editor,
-            // primero regresamos al editor.
+                saveProject(project);
 
-            if (state.view !== "editor") {
+                renderFileTree();
 
-                await loadView("editor");
+                loadActiveFile();
+
             }
-
-            runCode();
-        }
-    );
-}
-
-
-// ============================================================
-// EDITOR
-// ============================================================
-
-function initEditor() {
-
-    const editor =
-        document.getElementById("code");
-
-    if (!editor) return;
-
-    // Protección adicional
-    if (
-        !state.project ||
-        !state.project.files
-    ) {
-        state.project =
-            crearProyectoSeguro();
-    }
-
-    const content =
-        state.project.files[
-            state.currentFile
-        ];
-
-    editor.value =
-        content ?? "";
-
-    const currentTab =
-        document.getElementById(
-            "currentTab"
         );
 
-    if (currentTab) {
+        tree.appendChild(button);
 
-        currentTab.textContent =
-            state.currentFile;
-    }
+    });
 
-    setupEditorEvents();
-
-    setupEditorButtons();
-
-    renderFileTree();
-
-    updateEditor();
-
-    renderBottomPanel();
-
-    updateInspector();
 }
 
 
-// ============================================================
-// EVENTOS DEL EDITOR
-// ============================================================
+/* =====================================================
+   ACTIVE FILE
+===================================================== */
 
-function setupEditorEvents() {
+function loadActiveFile() {
 
-    const editor =
-        document.getElementById("code");
+    const textarea =
+        $("#code");
 
-    if (!editor) return;
+    if (!textarea) return;
 
-    editor.addEventListener(
+    const file =
+        project.active;
+
+    textarea.value =
+        file && project.files[file]
+            ? project.files[file]
+            : "";
+
+    const tab =
+        $("#currentTab");
+
+    if (tab) {
+
+        tab.textContent =
+            file
+                ? file.split("/").pop()
+                : "Sin archivo";
+
+    }
+
+    const path =
+        document.querySelector(".tab-path");
+
+    if (path) {
+
+        path.textContent =
+            file
+                ? "/" +
+                  file
+                    .split("/")
+                    .slice(0, -1)
+                    .join("/")
+                : "/";
+
+    }
+
+    updateLineNumbers();
+
+    updateHighlight();
+
+    updateCursor();
+
+}
+
+
+/* =====================================================
+   EDITOR INPUT
+===================================================== */
+
+function bindEditorInput() {
+
+    const textarea =
+        $("#code");
+
+    if (!textarea) return;
+
+    textarea.addEventListener(
         "input",
         () => {
 
-            saveCurrentFile();
+            if (project.active) {
 
-            updateEditor();
+                project.files[
+                    project.active
+                ] = textarea.value;
+
+                saveProject(project);
+
+            }
+
+            updateLineNumbers();
+
+            updateHighlight();
+
+            updateCursor();
+
+            updateTokenCount();
 
         }
     );
 
-    editor.addEventListener(
+
+    textarea.addEventListener(
         "scroll",
-        syncScroll
+        syncEditorScroll
     );
 
-    editor.addEventListener(
+
+    textarea.addEventListener(
+        "click",
+        updateCursor
+    );
+
+
+    textarea.addEventListener(
         "keyup",
         updateCursor
     );
 
-    editor.addEventListener(
-        "click",
+
+    textarea.addEventListener(
+        "select",
         updateCursor
     );
 
-    editor.addEventListener(
+}
+
+
+/* =====================================================
+   SCROLL
+===================================================== */
+
+function syncEditorScroll() {
+
+    const textarea =
+        $("#code");
+
+    const highlight =
+        $("#highlight");
+
+    const gutter =
+        $("#gutter");
+
+    if (!textarea) return;
+
+    if (highlight) {
+
+        highlight.scrollTop =
+            textarea.scrollTop;
+
+        highlight.scrollLeft =
+            textarea.scrollLeft;
+
+    }
+
+    if (gutter) {
+
+        gutter.scrollTop =
+            textarea.scrollTop;
+
+    }
+
+}
+
+
+/* =====================================================
+   LINE NUMBERS
+===================================================== */
+
+function updateLineNumbers() {
+
+    const textarea =
+        $("#code");
+
+    const gutter =
+        $("#gutter");
+
+    if (!textarea || !gutter) return;
+
+    const lines =
+        textarea.value.split("\n");
+
+    gutter.innerHTML =
+        lines.map(
+            (_, index) => `
+                <div
+                    class="gutter-line"
+                    data-line="${index + 1}"
+                >
+                    ${index + 1}
+                </div>
+            `
+        ).join("");
+
+    updateActiveLine();
+
+}
+
+
+/* =====================================================
+   ACTIVE LINE
+===================================================== */
+
+function updateActiveLine() {
+
+    const textarea =
+        $("#code");
+
+    const gutter =
+        $("#gutter");
+
+    if (!textarea || !gutter) return;
+
+    const beforeCursor =
+        textarea.value.slice(
+            0,
+            textarea.selectionStart
+        );
+
+    const line =
+        beforeCursor.split("\n").length;
+
+
+    gutter
+        .querySelectorAll(".gutter-line")
+        .forEach(element => {
+
+            element.classList.toggle(
+                "active",
+                Number(
+                    element.dataset.line
+                ) === line
+            );
+
+        });
+
+}
+
+
+/* =====================================================
+   CURSOR
+===================================================== */
+
+function updateCursor() {
+
+    const textarea =
+        $("#code");
+
+    const output =
+        $("#cursorPos");
+
+    if (!textarea || !output) return;
+
+    const before =
+        textarea.value.slice(
+            0,
+            textarea.selectionStart
+        );
+
+    const parts =
+        before.split("\n");
+
+    const line =
+        parts.length;
+
+    const column =
+        parts[parts.length - 1].length + 1;
+
+    output.textContent =
+        `Ln ${line} : Col ${column}`;
+
+    updateActiveLine();
+
+}
+
+
+/* =====================================================
+   SYNTAX HIGHLIGHT
+===================================================== */
+
+function highlightCode(source) {
+
+    let text =
+        escapeHtml(source);
+
+    const placeholders = [];
+
+    function protect(html) {
+
+        const id =
+            `@@CODESP_${placeholders.length}@@`;
+
+        placeholders.push(html);
+
+        return id;
+
+    }
+
+
+    /* Comentarios */
+
+    text =
+        text.replace(
+            /(^|\n)(\s*#.*)/g,
+            (_, start, comment) =>
+                start +
+                protect(
+                    `<span class="code-comment">${comment}</span>`
+                )
+        );
+
+
+    /* Strings */
+
+    text =
+        text.replace(
+            /(["'])(?:\\.|(?!\1)[^\\\n])*\1/g,
+            match =>
+                protect(
+                    `<span class="code-string">${match}</span>`
+                )
+        );
+
+
+    /* Palabras */
+
+    const keywords = [
+        "usar",
+        "definir",
+        "si",
+        "si no",
+        "mientras",
+        "para",
+        "en",
+        "intentar",
+        "capturar",
+        "devolver",
+        "plugin",
+        "funcion",
+        "sesion",
+        "crear",
+        "solicitar",
+        "simultaneamente",
+        "mostrar"
+    ];
+
+
+    keywords.forEach(keyword => {
+
+        const regex =
+            new RegExp(
+                `\\b${keyword.replace(
+                    " ",
+                    "\\s+"
+                )}\\b`,
+                "g"
+            );
+
+        text =
+            text.replace(
+                regex,
+                match =>
+                    `<span class="code-keyword">${match}</span>`
+            );
+
+    });
+
+
+    /* Definiciones */
+
+    text =
+        text.replace(
+            /\b(definir|funcion)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ_][\wÁÉÍÓÚáéíóúÑñ]*)/g,
+            (_, keyword, name) =>
+                `<span class="code-keyword">${keyword}</span> ` +
+                `<span class="code-definition">${name}</span>`
+        );
+
+
+    /* Funciones */
+
+    text =
+        text.replace(
+            /\b([A-Za-zÁÉÍÓÚáéíóúÑñ_][\wÁÉÍÓÚáéíóúÑñ]*)\s*(?=\()/g,
+            match =>
+                `<span class="code-function">${match}</span>`
+        );
+
+
+    /* Números */
+
+    text =
+        text.replace(
+            /\b\d+(?:\.\d+)?\b/g,
+            match =>
+                `<span class="code-number">${match}</span>`
+        );
+
+
+    /* Booleanos */
+
+    text =
+        text.replace(
+            /\b(verdadero|falso|null|nulo)\b/g,
+            match =>
+                `<span class="code-boolean">${match}</span>`
+        );
+
+
+    /* Operadores */
+
+    text =
+        text.replace(
+            /(==|!=|<=|>=|\+|-|\*|\/|=)/g,
+            match =>
+                `<span class="code-operator">${match}</span>`
+        );
+
+
+    /* Restaurar */
+
+    placeholders.forEach(
+        (html, index) => {
+
+            text =
+                text.replace(
+                    `@@CODESP_${index}@@`,
+                    html
+                );
+
+        }
+    );
+
+
+    return text;
+
+}
+
+
+function updateHighlight() {
+
+    const textarea =
+        $("#code");
+
+    const highlight =
+        $("#highlight");
+
+    if (!textarea || !highlight) return;
+
+    highlight.innerHTML =
+        highlightCode(
+            textarea.value
+        ) + "\n";
+
+    syncEditorScroll();
+
+}
+
+
+/* =====================================================
+   TOKEN COUNT
+===================================================== */
+
+function updateTokenCount() {
+
+    const textarea =
+        $("#code");
+
+    const target =
+        $("#tokenState");
+
+    if (!textarea || !target) return;
+
+    try {
+
+        const tokens =
+            tokenizar(
+                textarea.value
+            );
+
+        target.textContent =
+            `${tokens?.length ?? 0} tokens`;
+
+    } catch {
+
+        target.textContent =
+            "0 tokens";
+
+    }
+
+}
+
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+function bindEditorKeyboard() {
+
+    const textarea =
+        $("#code");
+
+    if (!textarea) return;
+
+
+    textarea.addEventListener(
         "keydown",
         event => {
 
-            // TAB
-            if (event.key === "Tab") {
+            /* Ctrl + S */
 
-                event.preventDefault();
-
-                const start =
-                    editor.selectionStart;
-
-                const end =
-                    editor.selectionEnd;
-
-                editor.value =
-                    editor.value.slice(
-                        0,
-                        start
-                    ) +
-                    "    " +
-                    editor.value.slice(
-                        end
-                    );
-
-                editor.selectionStart =
-                    editor.selectionEnd =
-                    start + 4;
-
-                saveCurrentFile();
-
-                updateEditor();
-            }
-
-            // CTRL + S
             if (
                 (event.ctrlKey ||
                  event.metaKey) &&
@@ -563,81 +756,687 @@ function setupEditorEvents() {
 
                 saveCurrentFile();
 
-                showConsole(
-                    "Archivo guardado.",
-                    "success"
-                );
+                return;
             }
 
-            // CTRL + ENTER
+
+            /* Ctrl + Enter */
+
             if (
-                (event.ctrlKey ||
-                 event.metaKey) &&
+                event.ctrlKey &&
                 event.key === "Enter"
             ) {
 
                 event.preventDefault();
 
                 runCode();
+
+                return;
             }
+
+
+            /* TAB */
+
+            if (event.key === "Tab") {
+
+                event.preventDefault();
+
+                const start =
+                    textarea.selectionStart;
+
+                const end =
+                    textarea.selectionEnd;
+
+                textarea.setRangeText(
+                    "    ",
+                    start,
+                    end,
+                    "end"
+                );
+
+                textarea.dispatchEvent(
+                    new Event("input")
+                );
+
+            }
+
         }
     );
+
 }
 
 
-// ============================================================
-// BOTONES DEL EDITOR
-// ============================================================
+/* =====================================================
+   TOOLBAR
+===================================================== */
 
-function setupEditorButtons() {
+function bindEditorToolbar() {
 
-    bind(
-        "newFile",
-        "click",
-        createNewFile
+    $("#newFile")
+        ?.addEventListener(
+            "click",
+            createNewFile
+        );
+
+
+    $("#openFile")
+        ?.addEventListener(
+            "click",
+            openCodeFile
+        );
+
+
+    $("#saveFile")
+        ?.addEventListener(
+            "click",
+            saveCurrentFile
+        );
+
+
+    $("#runCode")
+        ?.addEventListener(
+            "click",
+            runCode
+        );
+
+
+    $("#stopCode")
+        ?.addEventListener(
+            "click",
+            stopCode
+        );
+
+
+    $("#importCurl")
+        ?.addEventListener(
+            "click",
+            importCurl
+        );
+
+
+    $("#exportPython")
+        ?.addEventListener(
+            "click",
+            exportPython
+        );
+
+
+    $("#newPlugin")
+        ?.addEventListener(
+            "click",
+            createPlugin
+        );
+
+
+    $("#runTop")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (currentView !== "editor") {
+
+                    location.hash =
+                        "#editor";
+
+                    return;
+
+                }
+
+                runCode();
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   NEW FILE
+===================================================== */
+
+function createNewFile() {
+
+    const name =
+        prompt(
+            "Nombre del archivo:",
+            "nuevo.codesp"
+        );
+
+    if (!name) return;
+
+    try {
+
+        addFile(
+            project,
+            name,
+            ""
+        );
+
+        project =
+            loadProject();
+
+        renderFileTree();
+
+        loadActiveFile();
+
+        showToast(
+            "Archivo creado."
+        );
+
+    } catch (error) {
+
+        showToast(
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   OPEN FILE
+===================================================== */
+
+function openCodeFile() {
+
+    const picker =
+        $("#filePicker");
+
+    if (!picker) return;
+
+    picker.value = "";
+
+    picker.onchange =
+        async () => {
+
+            const file =
+                picker.files?.[0];
+
+            if (!file) return;
+
+            const content =
+                await file.text();
+
+            const name =
+                file.name.endsWith(".codesp")
+                    ? file.name
+                    : file.name + ".codesp";
+
+            addFile(
+                project,
+                name,
+                content
+            );
+
+            project =
+                loadProject();
+
+            renderFileTree();
+
+            loadActiveFile();
+
+            showToast(
+                "Archivo abierto."
+            );
+
+        };
+
+    picker.click();
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+function saveCurrentFile() {
+
+    const textarea =
+        $("#code");
+
+    if (!textarea || !project.active) {
+
+        showToast(
+            "No hay archivo abierto."
+        );
+
+        return;
+
+    }
+
+    project.files[
+        project.active
+    ] = textarea.value;
+
+    saveProject(project);
+
+    const state =
+        $("#compileState");
+
+    if (state) {
+        state.textContent =
+            "GUARDADO";
+    }
+
+    showToast(
+        "Archivo guardado."
     );
 
-    bind(
-        "openFile",
-        "click",
-        () => filePicker?.click()
+    setTimeout(() => {
+
+        if (state) {
+            state.textContent =
+                "LISTO";
+        }
+
+    }, 1200);
+
+}
+
+
+/* =====================================================
+   RUN
+===================================================== */
+
+async function runCode() {
+
+    const textarea =
+        $("#code");
+
+    if (!textarea) return;
+
+    const source =
+        textarea.value;
+
+    clearOutput();
+
+    const state =
+        $("#compileState");
+
+    if (state) {
+        state.textContent =
+            "EJECUTANDO";
+    }
+
+    try {
+
+        const tokens =
+            tokenizar(source);
+
+        const ast =
+            parse(
+                source,
+                tokens
+            );
+
+        renderAst(ast);
+
+        runtime =
+            createRuntime();
+
+        if (
+            runtime &&
+            typeof runtime.ejecutar === "function"
+        ) {
+
+            await runtime.ejecutar(ast);
+
+        } else if (
+            runtime &&
+            typeof runtime.run === "function"
+        ) {
+
+            await runtime.run(ast);
+
+        } else {
+
+            log(
+                "AST generado correctamente.",
+                "success"
+            );
+
+        }
+
+        if (state) {
+            state.textContent =
+                "LISTO";
+        }
+
+    } catch (error) {
+
+        errorLogs.push(error);
+
+        log(
+            error.message ||
+            String(error),
+            "error"
+        );
+
+        renderErrors();
+
+        if (state) {
+            state.textContent =
+                "ERROR";
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   RUNTIME
+===================================================== */
+
+function createRuntime() {
+
+    try {
+
+        return new Runtime({
+
+            onLog(message) {
+
+                log(
+                    message,
+                    "info"
+                );
+
+            },
+
+            onNetwork(request) {
+
+                networkLogs.push(
+                    request
+                );
+
+                renderNetwork();
+
+            },
+
+            onVariables(variables) {
+
+                renderVariables(
+                    variables
+                );
+
+            }
+
+        });
+
+    } catch {
+
+        try {
+
+            return new Runtime();
+
+        } catch {
+
+            return null;
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   STOP
+===================================================== */
+
+function stopCode() {
+
+    if (
+        runtime &&
+        typeof runtime.stop === "function"
+    ) {
+
+        runtime.stop();
+
+    }
+
+    log(
+        "Ejecución detenida.",
+        "muted"
     );
 
-    bind(
-        "saveFile",
-        "click",
-        saveCurrentFile
-    );
+}
 
-    bind(
-        "runCode",
-        "click",
-        runCode
-    );
 
-    bind(
-        "stopCode",
-        "click",
-        stopCode
-    );
+/* =====================================================
+   CONSOLE
+===================================================== */
 
-    bind(
-        "importCurl",
-        "click",
-        importCurl
-    );
+function log(message, type = "info") {
 
-    bind(
-        "exportPython",
-        "click",
-        exportPython
-    );
+    logs.push({
+        message:
+            String(message),
+        type
+    });
 
-    bind(
-        "newPlugin",
-        "click",
-        createPlugin
-    );
+    renderConsole();
+
+}
+
+
+function clearOutput() {
+
+    logs = [];
+
+    networkLogs = [];
+
+    errorLogs = [];
+
+    renderConsole();
+
+    renderNetwork();
+
+    renderErrors();
+
+}
+
+
+function renderConsole() {
+
+    const container =
+        $("#bottomContent");
+
+    if (
+        !container ||
+        bottomPanel !== "console"
+    ) return;
+
+    if (!logs.length) {
+
+        container.innerHTML =
+            `<div class="console-muted">
+                Consola lista.
+            </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        logs.map(
+            item =>
+                `<div class="console-line console-${item.type}">
+                    ${escapeHtml(item.message)}
+                </div>`
+        ).join("");
+
+}
+
+
+/* =====================================================
+   NETWORK
+===================================================== */
+
+function renderNetwork() {
+
+    const container =
+        $("#bottomContent");
+
+    if (
+        !container ||
+        bottomPanel !== "network"
+    ) return;
+
+    if (!networkLogs.length) {
+
+        container.innerHTML =
+            `<div class="console-muted">
+                No hay solicitudes.
+            </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        networkLogs.map(
+            item => {
+
+                const method =
+                    item.method ||
+                    item.metodo ||
+                    "HTTP";
+
+                const url =
+                    item.url ||
+                    item.href ||
+                    "";
+
+                const status =
+                    item.status ||
+                    item.estado ||
+                    "";
+
+                return `
+                    <div class="network-card">
+
+                        <span class="network-method">
+                            ${escapeHtml(method)}
+                        </span>
+
+                        ${escapeHtml(url)}
+
+                        ${
+                            status
+                                ? ` — ${escapeHtml(status)}`
+                                : ""
+                        }
+
+                    </div>
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+function renderVariables(variables) {
+
+    const target =
+        $("#variables");
+
+    if (!target) return;
+
+    if (
+        !variables ||
+        typeof variables !== "object"
+    ) {
+
+        target.textContent =
+            "Sin variables.";
+
+        return;
+
+    }
+
+    target.textContent =
+        JSON.stringify(
+            variables,
+            null,
+            2
+        );
+
+}
+
+
+/* =====================================================
+   AST
+===================================================== */
+
+function renderAst(ast) {
+
+    const target =
+        $("#astInfo");
+
+    if (!target) return;
+
+    target.textContent =
+        JSON.stringify(
+            ast,
+            null,
+            2
+        );
+
+}
+
+
+/* =====================================================
+   ERRORS
+===================================================== */
+
+function renderErrors() {
+
+    const container =
+        $("#bottomContent");
+
+    if (
+        !container ||
+        bottomPanel !== "errors"
+    ) return;
+
+    if (!errorLogs.length) {
+
+        container.innerHTML =
+            `<div class="console-success">
+                No hay errores.
+            </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        errorLogs.map(
+            error =>
+                `<div class="console-line console-error">
+                    ${escapeHtml(
+                        error.message ||
+                        String(error)
+                    )}
+                </div>`
+        ).join("");
+
+}
+
+
+/* =====================================================
+   BOTTOM PANELS
+===================================================== */
+
+function bindBottomPanels() {
 
     document
         .querySelectorAll(
@@ -649,1247 +1448,58 @@ function setupEditorButtons() {
                 "click",
                 () => {
 
-                    state.activePanel =
+                    bottomPanel =
                         button.dataset.panel;
 
                     document
                         .querySelectorAll(
                             ".bottom-tabs button"
                         )
-                        .forEach(
-                            b =>
-                                b.classList.remove(
-                                    "active"
-                                )
-                        );
+                        .forEach(btn => {
 
-                    button.classList.add(
-                        "active"
-                    );
+                            btn.classList.toggle(
+                                "active",
+                                btn === button
+                            );
+
+                        });
 
                     renderBottomPanel();
+
                 }
             );
-        });
-}
 
-
-// ============================================================
-// BIND
-// ============================================================
-
-function bind(
-    id,
-    event,
-    callback
-) {
-
-    const element =
-        document.getElementById(id);
-
-    if (!element) return;
-
-    element.addEventListener(
-        event,
-        callback
-    );
-}
-
-
-// ============================================================
-// ARCHIVO ACTUAL
-// ============================================================
-
-function saveCurrentFile() {
-
-    const editor =
-        document.getElementById("code");
-
-    if (!editor) return;
-
-    if (
-        !state.project ||
-        typeof state.project !== "object"
-    ) {
-        state.project =
-            crearProyectoSeguro();
-    }
-
-    if (
-        !state.project.files ||
-        typeof state.project.files !== "object"
-    ) {
-        state.project.files = {};
-    }
-
-    state.project.files[
-        state.currentFile
-    ] = editor.value;
-
-    state.project.active =
-        state.currentFile;
-
-    saveProject(
-        state.project
-    );
-}
-
-
-// ============================================================
-// ÁRBOL DE ARCHIVOS
-// ============================================================
-
-function renderFileTree() {
-
-    const tree =
-        document.getElementById(
-            "fileTree"
-        );
-
-    if (!tree) return;
-
-    tree.innerHTML = "";
-
-    const files =
-        obtenerArchivos();
-
-    files.forEach(name => {
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-        button.className =
-            "file-row";
-
-        if (
-            name ===
-            state.currentFile
-        ) {
-
-            button.classList.add(
-                "active"
-            );
-        }
-
-        button.innerHTML = `
-            <span>▤</span>
-
-            <span>
-                ${escapeHTML(name)}
-            </span>
-        `;
-
-        button.addEventListener(
-            "click",
-            () => openFile(name)
-        );
-
-        tree.appendChild(button);
-    });
-}
-
-
-// ============================================================
-// ABRIR ARCHIVO
-// ============================================================
-
-async function openFile(name) {
-
-    saveCurrentFile();
-
-    if (
-        !state.project ||
-        !state.project.files
-    ) {
-        return;
-    }
-
-    if (
-        !Object.prototype.hasOwnProperty.call(
-            state.project.files,
-            name
-        )
-    ) {
-        return;
-    }
-
-    state.currentFile =
-        name;
-
-    state.project.active =
-        name;
-
-    saveProject(
-        state.project
-    );
-
-    if (state.view !== "editor") {
-
-        await loadView("editor");
-
-        return;
-    }
-
-    const editor =
-        document.getElementById("code");
-
-    if (!editor) return;
-
-    editor.value =
-        state.project.files[name] || "";
-
-    const tab =
-        document.getElementById(
-            "currentTab"
-        );
-
-    if (tab) {
-        tab.textContent = name;
-    }
-
-    renderFileTree();
-
-    updateEditor();
-
-    updateInspector();
-}
-
-
-// ============================================================
-// NUEVO ARCHIVO
-// ============================================================
-
-function createNewFile() {
-
-    let name =
-        prompt(
-            "Nombre del archivo:",
-            "nuevo.codesp"
-        );
-
-    if (!name) return;
-
-    name = name.trim();
-
-    if (
-        !name.toLowerCase()
-            .endsWith(".codesp")
-    ) {
-        name += ".codesp";
-    }
-
-    if (
-        state.project.files[name]
-    ) {
-
-        alert(
-            "Ese archivo ya existe."
-        );
-
-        return;
-    }
-
-    addFile(
-        state.project,
-        name,
-        ""
-    );
-
-    state.currentFile =
-        name;
-
-    state.project.active =
-        name;
-
-    saveProject(
-        state.project
-    );
-
-    openFile(name);
-}
-
-
-// ============================================================
-// CREAR PLUGIN
-// ============================================================
-
-function createPlugin() {
-
-    let name =
-        prompt(
-            "Nombre del plugin:",
-            "mi-plugin"
-        );
-
-    if (!name) return;
-
-    name =
-        name
-            .trim()
-            .replace(
-                /\.codesp$/i,
-                ""
-            )
-            .replace(
-                /[^a-zA-Z0-9_-]/g,
-                "-"
-            );
-
-    const file =
-        `plugins/${name}.codesp`;
-
-    if (
-        state.project.files[file]
-    ) {
-
-        alert(
-            "Ese plugin ya existe."
-        );
-
-        return;
-    }
-
-    const content =
-`plugin "${name}":
-
-    definir version = "1.0.0"
-
-    funcion saludo(nombre):
-        devolver "Hola " + nombre
-`;
-
-    addFile(
-        state.project,
-        file,
-        content
-    );
-
-    state.currentFile =
-        file;
-
-    state.project.active =
-        file;
-
-    saveProject(
-        state.project
-    );
-
-    openFile(file);
-}
-
-
-// ============================================================
-// EJECUTAR
-// ============================================================
-
-async function runCode() {
-
-    const editor =
-        document.getElementById("code");
-
-    if (!editor) return;
-
-    if (state.running) {
-        return;
-    }
-
-    saveCurrentFile();
-
-    state.errors = [];
-
-    state.network = [];
-
-    state.console = [];
-
-    state.lastResponse = null;
-
-    state.running = true;
-
-    setCompileState(
-        "ANALIZANDO"
-    );
-
-    renderBottomPanel();
-
-    try {
-
-        const source =
-            editor.value;
-
-
-        // ----------------------------------------------------
-        // LEXER
-        // ----------------------------------------------------
-
-        const tokens =
-            tokenizar(source);
-
-        const tokenState =
-            document.getElementById(
-                "tokenState"
-            );
-
-        if (tokenState) {
-
-            tokenState.textContent =
-                `${tokens.length} tokens`;
-        }
-
-
-        // ----------------------------------------------------
-        // PARSER
-        // ----------------------------------------------------
-
-        const ast =
-            parse(
-                source,
-                tokens
-            );
-
-        state.ast =
-            ast;
-
-        showAST(ast);
-
-
-        // ----------------------------------------------------
-        // RUNTIME
-        // ----------------------------------------------------
-
-        setCompileState(
-            "EJECUTANDO"
-        );
-
-        state.runtime =
-            new Runtime({
-
-                onLog:
-                    (message, type = "log") => {
-
-                        showConsole(
-                            message,
-                            type
-                        );
-                    },
-
-                onNetwork:
-                    network => {
-
-                        state.network.unshift(
-                            network
-                        );
-
-                        if (
-                            state.network.length >
-                            100
-                        ) {
-
-                            state.network.pop();
-                        }
-
-                        state.lastResponse =
-                            network;
-
-                        updateInspector();
-
-                        if (
-                            state.activePanel ===
-                            "network"
-                        ) {
-
-                            renderBottomPanel();
-                        }
-                    },
-
-                onVariables:
-                    variables => {
-
-                        renderVariables(
-                            variables
-                        );
-                    }
-            });
-
-
-        // ----------------------------------------------------
-        // EJECUTAR AST
-        // ----------------------------------------------------
-
-        await state.runtime.run(
-            ast
-        );
-
-        state.running =
-            false;
-
-        setCompileState(
-            "LISTO"
-        );
-
-        showConsole(
-            "Ejecución finalizada.",
-            "success"
-        );
-
-        updateInspector();
-
-    } catch (error) {
-
-        state.running =
-            false;
-
-        state.errors.push({
-
-            message:
-                error?.message ||
-                String(error),
-
-            stack:
-                error?.stack || ""
         });
 
-        setCompileState(
-            "ERROR"
-        );
-
-        showConsole(
-            `ERROR: ${
-                error?.message ||
-                String(error)
-            }`,
-            "error"
-        );
-
-        renderBottomPanel();
-
-        console.error(
-            "CodEsp:",
-            error
-        );
-    }
 }
 
-
-// ============================================================
-// DETENER
-// ============================================================
-
-function stopCode() {
-
-    if (
-        state.runtime &&
-        typeof state.runtime.stop ===
-        "function"
-    ) {
-
-        state.runtime.stop();
-    }
-
-    state.running =
-        false;
-
-    setCompileState(
-        "DETENIDO"
-    );
-
-    showConsole(
-        "Ejecución detenida.",
-        "warning"
-    );
-}
-
-
-// ============================================================
-// ESTADO
-// ============================================================
-
-function setCompileState(text) {
-
-    const element =
-        document.getElementById(
-            "compileState"
-        );
-
-    if (element) {
-        element.textContent =
-            text;
-    }
-}
-
-
-// ============================================================
-// CONSOLA
-// ============================================================
-
-function showConsole(
-    message,
-    type = "log"
-) {
-
-    let text;
-
-    if (
-        typeof message ===
-        "object"
-    ) {
-
-        try {
-
-            text =
-                JSON.stringify(
-                    message,
-                    null,
-                    2
-                );
-
-        } catch {
-
-            text =
-                String(message);
-        }
-
-    } else {
-
-        text =
-            String(message);
-    }
-
-    state.console.push({
-
-        text,
-
-        type,
-
-        date: new Date()
-    });
-
-    if (
-        state.console.length >
-        500
-    ) {
-
-        state.console.shift();
-    }
-
-    if (
-        state.activePanel ===
-        "console"
-    ) {
-
-        renderBottomPanel();
-    }
-}
-
-
-// ============================================================
-// PANEL INFERIOR
-// ============================================================
 
 function renderBottomPanel() {
 
-    const content =
-        document.getElementById(
-            "bottomContent"
-        );
-
-    if (!content) return;
-
-
-    // ------------------------------------------
-    // CONSOLA
-    // ------------------------------------------
-
     if (
-        state.activePanel ===
-        "console"
+        bottomPanel === "console"
     ) {
-
-        if (!state.console.length) {
-
-            content.innerHTML = `
-                <div class="empty-state">
-                    Consola vacía.
-                </div>
-            `;
-
-            return;
-        }
-
-        content.innerHTML =
-            state.console
-                .map(item => `
-
-                    <div class="console-line ${
-                        escapeHTML(item.type)
-                    }">
-
-                        <span class="console-prefix">
-                            ${consoleIcon(
-                                item.type
-                            )}
-                        </span>
-
-                        <pre>${escapeHTML(
-                            item.text
-                        )}</pre>
-
-                    </div>
-
-                `)
-                .join("");
-
-        return;
+        renderConsole();
     }
 
-
-    // ------------------------------------------
-    // RED
-    // ------------------------------------------
-
     if (
-        state.activePanel ===
-        "network"
+        bottomPanel === "network"
     ) {
-
-        if (!state.network.length) {
-
-            content.innerHTML = `
-                <div class="empty-state">
-                    No hay solicitudes HTTP.
-                </div>
-            `;
-
-            return;
-        }
-
-        content.innerHTML =
-            state.network
-                .map(item => `
-
-                    <div class="network-row">
-
-                        <strong>
-                            ${escapeHTML(
-                                item.method ||
-                                item.metodo ||
-                                "HTTP"
-                            )}
-                        </strong>
-
-                        <span>
-                            ${escapeHTML(
-                                item.url ||
-                                ""
-                            )}
-                        </span>
-
-                        <span>
-                            ${
-                                item.status ??
-                                item.estado ??
-                                "—"
-                            }
-                        </span>
-
-                        <span>
-                            ${
-                                item.duration ??
-                                item.duracion ??
-                                "—"
-                            } ms
-                        </span>
-
-                    </div>
-
-                `)
-                .join("");
-
-        return;
+        renderNetwork();
     }
 
-
-    // ------------------------------------------
-    // ERRORES
-    // ------------------------------------------
-
     if (
-        state.activePanel ===
-        "errors"
+        bottomPanel === "errors"
     ) {
-
-        if (!state.errors.length) {
-
-            content.innerHTML = `
-                <div class="empty-state">
-                    No hay errores.
-                </div>
-            `;
-
-            return;
-        }
-
-        content.innerHTML =
-            state.errors
-                .map(error => `
-
-                    <div class="error-entry">
-
-                        <strong>
-                            ${escapeHTML(
-                                error.message
-                            )}
-                        </strong>
-
-                        ${
-                            error.stack
-                                ? `
-                                    <pre>${escapeHTML(
-                                        error.stack
-                                    )}</pre>
-                                `
-                                : ""
-                        }
-
-                    </div>
-
-                `)
-                .join("");
+        renderErrors();
     }
+
 }
 
 
-function consoleIcon(type) {
-
-    const icons = {
-
-        log: "›",
-
-        info: "i",
-
-        success: "✓",
-
-        warning: "!",
-
-        error: "×"
-    };
-
-    return icons[type] || "›";
-}
-
-
-// ============================================================
-// VARIABLES
-// ============================================================
-
-function renderVariables(
-    variables
-) {
-
-    const element =
-        document.getElementById(
-            "variables"
-        );
-
-    if (!element) return;
-
-    if (
-        !variables ||
-        typeof variables !== "object" ||
-        !Object.keys(variables).length
-    ) {
-
-        element.textContent =
-            "Sin variables.";
-
-        return;
-    }
-
-    element.innerHTML =
-        Object.entries(variables)
-            .map(
-                ([name, value]) => {
-
-                    let text;
-
-                    try {
-
-                        text =
-                            typeof value === "object"
-                                ? JSON.stringify(
-                                    value,
-                                    null,
-                                    2
-                                )
-                                : String(value);
-
-                    } catch {
-
-                        text =
-                            "[objeto]";
-                    }
-
-                    return `
-                        <div class="variable-row">
-
-                            <b>
-                                ${escapeHTML(name)}
-                            </b>
-
-                            <pre>${escapeHTML(text)}</pre>
-
-                        </div>
-                    `;
-                }
-            )
-            .join("");
-}
-
-
-// ============================================================
-// INSPECTOR
-// ============================================================
-
-function updateInspector() {
-
-    if (
-        state.runtime
-    ) {
-
-        renderVariables(
-            state.runtime.env
-        );
-    }
-
-    const request =
-        document.getElementById(
-            "requestInfo"
-        );
-
-    if (!request) return;
-
-    const last =
-        state.lastResponse;
-
-    if (!last) {
-
-        request.textContent =
-            "Sin solicitud.";
-
-        return;
-    }
-
-    request.innerHTML = `
-
-        <div>
-            Método:
-            <b>
-                ${escapeHTML(
-                    last.method ||
-                    last.metodo ||
-                    "HTTP"
-                )}
-            </b>
-        </div>
-
-        <div>
-            Estado:
-            <b>
-                ${
-                    last.status ??
-                    last.estado ??
-                    "—"
-                }
-            </b>
-        </div>
-
-        <div>
-            Duración:
-            <b>
-                ${
-                    last.duration ??
-                    last.duracion ??
-                    "—"
-                } ms
-            </b>
-        </div>
-
-        <div class="inspect-url">
-            ${escapeHTML(
-                last.url || ""
-            )}
-        </div>
-
-    `;
-}
-
-
-// ============================================================
-// AST
-// ============================================================
-
-function showAST(ast) {
-
-    const element =
-        document.getElementById(
-            "astInfo"
-        );
-
-    if (!element) return;
-
-    try {
-
-        element.textContent =
-            JSON.stringify(
-                ast,
-                null,
-                2
-            );
-
-    } catch {
-
-        element.textContent =
-            "No se pudo mostrar el AST.";
-    }
-}
-
-
-// ============================================================
-// EDITOR VISUAL
-// ============================================================
-
-function updateEditor() {
-
-    const editor =
-        document.getElementById(
-            "code"
-        );
-
-    if (!editor) return;
-
-    const highlight =
-        document.getElementById(
-            "highlight"
-        );
-
-    const gutter =
-        document.getElementById(
-            "gutter"
-        );
-
-    if (highlight) {
-
-        highlight.innerHTML =
-            highlightCode(
-                editor.value
-            );
-    }
-
-    if (gutter) {
-
-        const lines =
-            Math.max(
-                editor.value
-                    .split("\n")
-                    .length,
-                1
-            );
-
-        gutter.innerHTML =
-            Array.from(
-                {
-                    length: lines
-                },
-                (_, index) =>
-                    `<span>${
-                        index + 1
-                    }</span>`
-            ).join("");
-    }
-
-    updateCursor();
-
-    syncScroll();
-}
-
-
-// ============================================================
-// HIGHLIGHT
-// ============================================================
-
-function highlightCode(source) {
-
-    if (!source) return "";
-
-    let html =
-        escapeHTML(source);
-
-    // Comentarios
-
-    html =
-        html.replace(
-            /(^|\n)(\s*#.*)/g,
-            "$1<span class=\"tok comment\">$2</span>"
-        );
-
-    // Strings
-
-    html =
-        html.replace(
-            /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g,
-            '<span class="tok string">$1</span>'
-        );
-
-    // Palabras clave
-
-    const keywords = [
-
-        "usar",
-        "importar",
-        "definir",
-        "asignar",
-        "si",
-        "no",
-        "mientras",
-        "para",
-        "en",
-        "funcion",
-        "devolver",
-        "intentar",
-        "capturar",
-        "plugin",
-        "mostrar",
-        "solicitar",
-        "simultaneamente",
-        "sesion",
-        "encabezados",
-        "parametros",
-        "enviar"
-    ];
-
-    const keywordPattern =
-        new RegExp(
-            `\\b(${keywords.join("|")})\\b`,
-            "g"
-        );
-
-    html =
-        html.replace(
-            keywordPattern,
-            '<span class="tok keyword">$1</span>'
-        );
-
-    // Métodos HTTP
-
-    html =
-        html.replace(
-            /\b(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b/g,
-            '<span class="tok http">$1</span>'
-        );
-
-    // Números
-
-    html =
-        html.replace(
-            /\b\d+(?:\.\d+)?\b/g,
-            '<span class="tok number">$&</span>'
-        );
-
-    return html;
-}
-
-
-// ============================================================
-// SCROLL
-// ============================================================
-
-function syncScroll() {
-
-    const editor =
-        document.getElementById(
-            "code"
-        );
-
-    const highlight =
-        document.getElementById(
-            "highlight"
-        );
-
-    const gutter =
-        document.getElementById(
-            "gutter"
-        );
-
-    if (!editor) return;
-
-    if (highlight) {
-
-        highlight.scrollTop =
-            editor.scrollTop;
-
-        highlight.scrollLeft =
-            editor.scrollLeft;
-    }
-
-    if (gutter) {
-
-        gutter.scrollTop =
-            editor.scrollTop;
-    }
-}
-
-
-// ============================================================
-// CURSOR
-// ============================================================
-
-function updateCursor() {
-
-    const editor =
-        document.getElementById(
-            "code"
-        );
-
-    const indicator =
-        document.getElementById(
-            "cursorPos"
-        );
-
-    if (
-        !editor ||
-        !indicator
-    ) return;
-
-    const position =
-        editor.selectionStart ||
-        0;
-
-    const before =
-        editor.value.slice(
-            0,
-            position
-        );
-
-    const lines =
-        before.split("\n");
-
-    const line =
-        lines.length;
-
-    const column =
-        lines[
-            lines.length - 1
-        ].length + 1;
-
-    indicator.textContent =
-        `Ln ${line} : Col ${column}`;
-}
-
-
-// ============================================================
-// CURL
-// ============================================================
+/* =====================================================
+   CURL
+===================================================== */
 
 function importCurl() {
 
@@ -1902,124 +1512,193 @@ function importCurl() {
 
     try {
 
-        const result =
-            convertirCurl(curl);
+        const converter =
+            CurlModule.convertirCurl ||
+            CurlModule.curlToCodesp ||
+            CurlModule.default;
 
-        const editor =
-            document.getElementById(
-                "code"
+        if (
+            typeof converter !==
+            "function"
+        ) {
+
+            throw new Error(
+                "curl.js no exporta una función de conversión compatible."
             );
 
-        if (!editor) return;
+        }
 
-        editor.value =
+        const result =
+            converter(curl);
+
+        const textarea =
+            $("#code");
+
+        if (!textarea) return;
+
+        textarea.value =
             result;
 
-        saveCurrentFile();
+        textarea.dispatchEvent(
+            new Event("input")
+        );
 
-        updateEditor();
-
-        showConsole(
-            "cURL convertido correctamente.",
-            "success"
+        showToast(
+            "cURL convertido a CodEsp."
         );
 
     } catch (error) {
 
-        showConsole(
-            `Error al convertir cURL: ${
-                error.message
-            }`,
-            "error"
+        showToast(
+            error.message
         );
+
     }
+
 }
 
 
-// ============================================================
-// PYTHON
-// ============================================================
+/* =====================================================
+   PYTHON
+===================================================== */
 
 function exportPython() {
 
-    const editor =
-        document.getElementById(
-            "code"
-        );
+    const textarea =
+        $("#code");
 
-    if (!editor) return;
+    if (!textarea) return;
 
     try {
 
-        const tokens =
-            tokenizar(
-                editor.value
+        const converter =
+            PythonModule.generarPython ||
+            PythonModule.codespToPython ||
+            PythonModule.default;
+
+        if (
+            typeof converter !==
+            "function"
+        ) {
+
+            throw new Error(
+                "python.js no exporta una función compatible."
             );
 
-        const ast =
-            parse(
-                editor.value,
-                tokens
+        }
+
+        const result =
+            converter(
+                textarea.value
             );
 
-        const python =
-            generarPython(ast);
+        const blob =
+            new Blob(
+                [result],
+                {
+                    type:
+                        "text/x-python"
+                }
+            );
 
-        downloadText(
-            state.currentFile
-                .replace(
-                    /\.codesp$/i,
-                    ""
-                ) +
-                ".py",
-            python
-        );
+        const url =
+            URL.createObjectURL(blob);
 
-        showConsole(
-            "Python generado correctamente.",
-            "success"
+        const a =
+            document.createElement("a");
+
+        a.href = url;
+
+        a.download =
+            "principal.py";
+
+        a.click();
+
+        URL.revokeObjectURL(url);
+
+        showToast(
+            "Python generado."
         );
 
     } catch (error) {
 
-        showConsole(
-            `Error al generar Python: ${
-                error.message
-            }`,
-            "error"
+        showToast(
+            error.message
         );
+
     }
+
 }
 
 
-// ============================================================
-// PLUGINS
-// ============================================================
+/* =====================================================
+   PLUGIN
+===================================================== */
+
+function createPlugin() {
+
+    const name =
+        prompt(
+            "Nombre del plugin:",
+            "mi-plugin"
+        );
+
+    if (!name) return;
+
+    const filename =
+        `plugins/${name
+            .replace(/\.codesp$/i, "")
+            .replace(/[^\w-]/g, "-")
+        }.codesp`;
+
+    const content =
+`plugin "${name}":
+    definir version = "1.0.0"
+
+    funcion ejecutar():
+        mostrar "Plugin ${name} activo"
+`;
+
+    addFile(
+        project,
+        filename,
+        content
+    );
+
+    project =
+        loadProject();
+
+    renderFileTree();
+
+    loadActiveFile();
+
+    showToast(
+        "Plugin creado."
+    );
+
+}
+
+
+/* =====================================================
+   PLUGINS VIEW
+===================================================== */
 
 function initPlugins() {
 
     const list =
-        document.getElementById(
-            "pluginList"
-        );
-
-    const detail =
-        document.getElementById(
-            "pluginDetail"
-        );
+        $("#pluginList");
 
     if (!list) return;
 
     const plugins =
-        Object.entries(
-            state.project?.files || {}
-        )
-        .filter(
-            ([name]) =>
-                name.startsWith(
+        Object.keys(
+            project.files
+        ).filter(
+            file =>
+                file.startsWith(
                     "plugins/"
                 ) &&
-                name.endsWith(
+                file.endsWith(
                     ".codesp"
                 )
         );
@@ -2027,481 +1706,354 @@ function initPlugins() {
 
     if (!plugins.length) {
 
-        list.innerHTML = `
-            <div class="empty-state">
+        list.innerHTML =
+            `<div class="empty-state">
                 No hay plugins instalados.
-            </div>
-        `;
+            </div>`;
 
     } else {
 
         list.innerHTML =
-            plugins
-                .map(
-                    ([name]) => `
+            plugins.map(
+                file => `
+                    <button
+                        class="plugin-item"
+                        data-plugin="${escapeHtml(file)}"
+                    >
+                        <span class="plugin-symbol">
+                            ◇
+                        </span>
 
-                        <button
-                            class="file-row"
-                            data-plugin="${escapeHTML(
-                                name
-                            )}"
-                        >
-
-                            <span>◆</span>
-
-                            <span>
-                                ${escapeHTML(
-                                    name.replace(
-                                        "plugins/",
-                                        ""
-                                    )
+                        <span>
+                            <strong>
+                                ${escapeHtml(
+                                    file
+                                        .split("/")
+                                        .pop()
                                 )}
-                            </span>
+                            </strong>
 
-                        </button>
-
-                    `
-                )
-                .join("");
+                            <small>
+                                Plugin CodEsp
+                            </small>
+                        </span>
+                    </button>
+                `
+            ).join("");
 
         list
             .querySelectorAll(
-                "[data-plugin]"
+                ".plugin-item"
             )
-            .forEach(
-                button => {
+            .forEach(button => {
 
-                    button.addEventListener(
-                        "click",
-                        () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                            const name =
-                                button.dataset
-                                    .plugin;
+                        showPlugin(
+                            button.dataset.plugin
+                        );
 
-                            if (!detail) {
-                                return;
-                            }
+                    }
+                );
 
-                            detail.innerHTML = `
-                                <h2>
-                                    ${escapeHTML(
-                                        name
-                                    )}
-                                </h2>
+            });
 
-                                <pre>${escapeHTML(
-                                    state.project.files[
-                                        name
-                                    ]
-                                )}</pre>
-                            `;
-                        }
-                    );
-                }
-            );
     }
 
 
-    const install =
-        document.getElementById(
-            "installPlugin"
-        );
-
-    if (install) {
-
-        install.addEventListener(
+    $("#installPlugin")
+        ?.addEventListener(
             "click",
-            installPlugin
+            openPlugin
         );
-    }
+
 }
 
 
-// ============================================================
-// INSTALAR PLUGIN
-// ============================================================
+function showPlugin(file) {
 
-function installPlugin() {
+    const detail =
+        $("#pluginDetail");
 
-    const input =
-        document.createElement(
-            "input"
-        );
+    if (!detail) return;
 
-    input.type = "file";
+    const content =
+        project.files[file] || "";
 
-    input.accept =
-        ".codesp,text/plain";
+    detail.innerHTML = `
+        <div class="plugin-detail-head">
 
-    input.addEventListener(
-        "change",
-        async () => {
+            <div class="plugin-big-icon">
+                ◇
+            </div>
 
-            const file =
-                input.files?.[0];
+            <div>
+                <h2>
+                    ${escapeHtml(
+                        file.split("/").pop()
+                    )}
+                </h2>
 
-            if (!file) return;
+                <p>
+                    ${escapeHtml(file)}
+                </p>
+            </div>
 
-            const content =
-                await file.text();
+        </div>
 
-            let name =
-                file.name;
+        <pre class="plugin-code">${escapeHtml(
+            content
+        )}</pre>
+    `;
 
-            if (
-                !name.endsWith(
-                    ".codesp"
-                )
-            ) {
-                name += ".codesp";
-            }
-
-            const path =
-                name.startsWith(
-                    "plugins/"
-                )
-                    ? name
-                    : `plugins/${name}`;
-
-            if (
-                state.project.files[path]
-            ) {
-
-                const replace =
-                    confirm(
-                        "Ese plugin ya existe. ¿Reemplazarlo?"
-                    );
-
-                if (!replace) {
-                    return;
-                }
-            }
-
-            addFile(
-                state.project,
-                path,
-                content
-            );
-
-            saveProject(
-                state.project
-            );
-
-            await loadView(
-                "plugins"
-            );
-        }
-    );
-
-    input.click();
 }
 
 
-// ============================================================
-// ARCHIVOS
-// ============================================================
+function openPlugin() {
+
+    openCodeFile();
+
+}
+
+
+/* =====================================================
+   ARCHIVOS VIEW
+===================================================== */
 
 function initFiles() {
 
-    const container =
-        document.getElementById(
-            "allFiles"
+    renderAllFiles();
+
+    $("#newFilePage")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                createNewFile();
+
+                setTimeout(
+                    () => {
+                        location.hash =
+                            "#archivos";
+                    },
+                    50
+                );
+
+            }
         );
 
-    if (container) {
 
-        const files =
-            obtenerArchivos();
+    $("#openFilePage")
+        ?.addEventListener(
+            "click",
+            openCodeFile
+        );
 
-        if (!files.length) {
+}
 
-            container.innerHTML = `
-                <div class="empty-state">
-                    No hay archivos.
+
+function renderAllFiles() {
+
+    const target =
+        $("#allFiles");
+
+    if (!target) return;
+
+    const files =
+        Object.keys(
+            project.files
+        );
+
+
+    if (!files.length) {
+
+        target.innerHTML =
+            `<div class="empty-state">
+                No hay archivos.
+            </div>`;
+
+        return;
+
+    }
+
+
+    target.innerHTML =
+        files.map(
+            file => `
+
+                <div class="file-row">
+
+                    <div class="file-row-name">
+
+                        <span>
+                            ${
+                                file.startsWith(
+                                    "plugins/"
+                                )
+                                    ? "◇"
+                                    : "▱"
+                            }
+                        </span>
+
+                        <strong>
+                            ${escapeHtml(file)}
+                        </strong>
+
+                    </div>
+
+                    <div class="file-row-actions">
+
+                        <button
+                            data-open="${escapeHtml(file)}"
+                        >
+                            Abrir
+                        </button>
+
+                        <button
+                            data-delete="${escapeHtml(file)}"
+                            class="danger"
+                        >
+                            Eliminar
+                        </button>
+
+                    </div>
+
                 </div>
-            `;
 
-        } else {
-
-            container.innerHTML =
-                files
-                    .map(
-                        name => `
-
-                            <div class="file-row">
-
-                                <span>▤</span>
-
-                                <span class="file-name">
-                                    ${escapeHTML(
-                                        name
-                                    )}
-                                </span>
-
-                                <button
-                                    data-open-file="${escapeHTML(
-                                        name
-                                    )}"
-                                >
-                                    Abrir
-                                </button>
-
-                            </div>
-
-                        `
-                    )
-                    .join("");
-        }
+            `
+        ).join("");
 
 
-        container
-            .querySelectorAll(
-                "[data-open-file]"
-            )
-            .forEach(
-                button => {
+    target
+        .querySelectorAll(
+            "[data-open]"
+        )
+        .forEach(button => {
 
-                    button.addEventListener(
-                        "click",
-                        () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                            openFile(
-                                button.dataset
-                                    .openFile
-                            );
+                    project.active =
+                        button.dataset.open;
 
-                        }
-                    );
+                    saveProject(project);
+
+                    location.hash =
+                        "#editor";
+
                 }
             );
-    }
+
+        });
 
 
-    bind(
-        "newFilePage",
-        "click",
-        createNewFile
-    );
+    target
+        .querySelectorAll(
+            "[data-delete]"
+        )
+        .forEach(button => {
 
-    bind(
-        "openFilePage",
-        "click",
-        () => filePicker?.click()
-    );
-}
+            button.addEventListener(
+                "click",
+                () => {
 
-
-// ============================================================
-// SELECTORES DE ARCHIVOS
-// ============================================================
-
-function setupFilePickers() {
-
-    if (filePicker) {
-
-        filePicker.addEventListener(
-            "change",
-            async event => {
-
-                const file =
-                    event.target.files?.[0];
-
-                if (!file) return;
-
-                let name =
-                    file.name;
-
-                if (
-                    !name.toLowerCase()
-                        .endsWith(".codesp")
-                ) {
-                    name += ".codesp";
-                }
-
-                const content =
-                    await file.text();
-
-                addFile(
-                    state.project,
-                    name,
-                    content
-                );
-
-                state.currentFile =
-                    name;
-
-                saveProject(
-                    state.project
-                );
-
-                await loadView(
-                    "editor"
-                );
-
-                filePicker.value =
-                    "";
-            }
-        );
-    }
-
-
-    if (projectPicker) {
-
-        projectPicker.addEventListener(
-            "change",
-            async event => {
-
-                const files =
-                    [...event.target.files];
-
-                for (
-                    const file of files
-                ) {
+                    const file =
+                        button.dataset.delete;
 
                     if (
-                        !file.name
-                            .toLowerCase()
-                            .endsWith(
-                                ".codesp"
-                            )
-                    ) {
-                        continue;
-                    }
+                        !confirm(
+                            `¿Eliminar ${file}?`
+                        )
+                    ) return;
 
-                    const content =
-                        await file.text();
-
-                    addFile(
-                        state.project,
-                        file.name,
-                        content
+                    removeFile(
+                        project,
+                        file
                     );
+
+                    project =
+                        loadProject();
+
+                    renderAllFiles();
+
+                    showToast(
+                        "Archivo eliminado."
+                    );
+
                 }
+            );
 
-                saveProject(
-                    state.project
-                );
+        });
 
-                await loadView(
-                    "editor"
-                );
-
-                projectPicker.value =
-                    "";
-            }
-        );
-    }
 }
 
 
-// ============================================================
-// DESCARGAR TEXTO
-// ============================================================
+/* =====================================================
+   HELP
+===================================================== */
 
-function downloadText(
-    filename,
-    content
+function initHelp() {
+
+    document
+        .querySelectorAll(
+            "[data-help-example]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const code =
+                        button.dataset.helpExample;
+
+                    project.active =
+                        "principal.codesp";
+
+                    project.files[
+                        project.active
+                    ] = code;
+
+                    saveProject(project);
+
+                    location.hash =
+                        "#editor";
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =====================================================
+   THEME
+===================================================== */
+
+if (
+    localStorage.getItem(
+        "codesp_theme"
+    ) === "dark"
 ) {
 
-    const blob =
-        new Blob(
-            [content],
-            {
-                type:
-                    "text/plain;charset=utf-8"
-            }
-        );
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-    const link =
-        document.createElement(
-            "a"
-        );
-
-    link.href =
-        url;
-
-    link.download =
-        filename;
-
-    document.body.appendChild(
-        link
+    document.body.classList.add(
+        "dark-mode"
     );
 
-    link.click();
-
-    link.remove();
-
-    URL.revokeObjectURL(
-        url
-    );
 }
 
 
-// ============================================================
-// ESCAPAR HTML
-// ============================================================
+/* =====================================================
+   FILE PICKER GLOBAL
+===================================================== */
 
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-    .replaceAll(
-        "&",
-        "&amp;"
-    )
-    .replaceAll(
-        "<",
-        "&lt;"
-    )
-    .replaceAll(
-        ">",
-        "&gt;"
-    )
-    .replaceAll(
-        '"',
-        "&quot;"
-    )
-    .replaceAll(
-        "'",
-        "&#039;"
+document
+    .getElementById("filePicker")
+    ?.addEventListener(
+        "change",
+        () => {}
     );
-}
-
-
-// ============================================================
-// API GLOBAL
-// ============================================================
-
-window.CodEsp = {
-
-    run:
-        runCode,
-
-    stop:
-        stopCode,
-
-    open:
-        openFile,
-
-    save:
-        saveCurrentFile,
-
-    newFile:
-        createNewFile,
-
-    view:
-        loadView,
-
-    importCurl,
-
-    exportPython,
-
-    state
-};
