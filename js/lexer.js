@@ -1,318 +1,470 @@
-export function lex(source) {
+// ==========================================
+// CodEsp — Lexer
+// ==========================================
+
+const KEYWORDS = new Set([
+    "usar",
+    "importar",
+    "definir",
+    "asignar",
+    "mostrar",
+    "si",
+    "no",
+    "mientras",
+    "para",
+    "en",
+    "funcion",
+    "devolver",
+    "intentar",
+    "capturar",
+    "plugin",
+    "sesion",
+    "crear",
+    "solicitar",
+    "simultaneamente",
+    "encabezados",
+    "parametros",
+    "enviar",
+    "verdadero",
+    "falso",
+    "nulo"
+]);
+
+const HTTP_METHODS = new Set([
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "HEAD",
+    "OPTIONS"
+]);
+
+
+// ==========================================
+// TOKENIZAR
+// ==========================================
+
+export function tokenizar(source) {
+
+    if (source === undefined || source === null) {
+        source = "";
+    }
+
+    source = String(source);
+
     const tokens = [];
 
     let i = 0;
-    let line = 1;
-    let column = 1;
+    let linea = 1;
+    let columna = 1;
 
-    const keywords = new Set([
-        "usar",
-        "importar",
-        "definir",
-        "asignar",
-        "mostrar",
-        "si",
-        "si",
-        "no",
-        "para",
-        "en",
-        "mientras",
-        "funcion",
-        "devolver",
-        "intentar",
-        "capturar",
-        "plugin",
-        "crear",
-        "sesion",
-        "solicitar",
-        "simultaneamente",
-        "verdadero",
-        "falso",
-        "nulo",
-        "esperar",
-        "encabezados",
-        "parametros",
-        "enviar"
-    ]);
+    function agregar(type, value, line, col) {
 
-    function add(type, value, startLine = line, startColumn = column) {
         tokens.push({
             type,
             value,
-            line: startLine,
-            column: startColumn
+            line,
+            column: col
         });
     }
 
-    function isLetter(char) {
-        return /[A-Za-zÁÉÍÓÚáéíóúÑñ_]/.test(char);
-    }
+    function avanzar() {
 
-    function isDigit(char) {
-        return /[0-9]/.test(char);
+        const char = source[i];
+
+        if (char === "\n") {
+            linea++;
+            columna = 1;
+        } else {
+            columna++;
+        }
+
+        i++;
     }
 
     while (i < source.length) {
+
         const char = source[i];
 
-        /*
-         * ESPACIOS
-         */
+        // ------------------------------------------
+        // ESPACIOS
+        // ------------------------------------------
 
-        if (char === " " || char === "\t" || char === "\r") {
-            i++;
-            column++;
+        if (
+            char === " " ||
+            char === "\t" ||
+            char === "\r"
+        ) {
+            avanzar();
             continue;
         }
 
-        /*
-         * SALTO DE LÍNEA
-         */
+
+        // ------------------------------------------
+        // NUEVA LÍNEA
+        // ------------------------------------------
 
         if (char === "\n") {
-            add("newline", "\n");
 
-            i++;
-            line++;
-            column = 1;
+            agregar(
+                "NEWLINE",
+                "\n",
+                linea,
+                columna
+            );
 
+            avanzar();
             continue;
         }
 
-        /*
-         * COMENTARIOS
-         */
+
+        // ------------------------------------------
+        // COMENTARIO
+        // ------------------------------------------
 
         if (char === "#") {
-            const startLine = line;
-            const startColumn = column;
 
-            let start = i;
+            const inicioLinea = linea;
+            const inicioColumna = columna;
+
+            let comentario = "";
 
             while (
                 i < source.length &&
                 source[i] !== "\n"
             ) {
-                i++;
-                column++;
+                comentario += source[i];
+                avanzar();
             }
 
-            add(
-                "comment",
-                source.slice(start, i),
-                startLine,
-                startColumn
+            agregar(
+                "COMMENT",
+                comentario,
+                inicioLinea,
+                inicioColumna
             );
 
             continue;
         }
 
-        /*
-         * CADENAS
-         */
 
-        if (char === '"' || char === "'") {
-            const quote = char;
+        // ------------------------------------------
+        // CADENA
+        // ------------------------------------------
 
-            const startLine = line;
-            const startColumn = column;
+        if (
+            char === '"' ||
+            char === "'"
+        ) {
 
-            let start = i;
+            const comilla = char;
+            const inicioLinea = linea;
+            const inicioColumna = columna;
 
-            i++;
-            column++;
+            let valor = "";
 
-            while (i < source.length) {
-                if (source[i] === "\\") {
-                    i += 2;
-                    column += 2;
-                    continue;
-                }
+            avanzar();
 
-                if (source[i] === quote) {
-                    i++;
-                    column++;
-                    break;
-                }
-
-                if (source[i] === "\n") {
-                    throw new Error(
-                        `Cadena sin cerrar en ${startLine}:${startColumn}`
-                    );
-                }
-
-                i++;
-                column++;
-            }
-
-            if (source[i - 1] !== quote) {
-                throw new Error(
-                    `Cadena sin cerrar en ${startLine}:${startColumn}`
-                );
-            }
-
-            add(
-                "string",
-                source.slice(start, i),
-                startLine,
-                startColumn
-            );
-
-            continue;
-        }
-
-        /*
-         * NÚMEROS
-         */
-
-        if (isDigit(char)) {
-            const startLine = line;
-            const startColumn = column;
-
-            let start = i;
-            let dots = 0;
+            let cerrada = false;
 
             while (i < source.length) {
-                const c = source[i];
 
-                if (c === ".") {
-                    dots++;
+                const actual = source[i];
 
-                    if (dots > 1) {
+                // Escape
+
+                if (actual === "\\") {
+
+                    const siguiente = source[i + 1];
+
+                    if (siguiente === undefined) {
+                        valor += "\\";
+                        avanzar();
                         break;
                     }
 
-                    i++;
-                    column++;
+                    switch (siguiente) {
+
+                        case "n":
+                            valor += "\n";
+                            break;
+
+                        case "r":
+                            valor += "\r";
+                            break;
+
+                        case "t":
+                            valor += "\t";
+                            break;
+
+                        case "\\":
+                            valor += "\\";
+                            break;
+
+                        case '"':
+                            valor += '"';
+                            break;
+
+                        case "'":
+                            valor += "'";
+                            break;
+
+                        default:
+                            valor += siguiente;
+                    }
+
+                    avanzar();
+                    avanzar();
+
                     continue;
                 }
 
-                if (!isDigit(c)) {
+                // Cierre
+
+                if (actual === comilla) {
+
+                    avanzar();
+                    cerrada = true;
                     break;
                 }
 
-                i++;
-                column++;
+                valor += actual;
+                avanzar();
             }
 
-            add(
-                "number",
-                source.slice(start, i),
-                startLine,
-                startColumn
+            if (!cerrada) {
+                throw new Error(
+                    `Cadena sin cerrar en línea ${inicioLinea}, columna ${inicioColumna}.`
+                );
+            }
+
+            agregar(
+                "STRING",
+                valor,
+                inicioLinea,
+                inicioColumna
             );
 
             continue;
         }
 
-        /*
-         * IDENTIFICADORES / PALABRAS CLAVE
-         */
 
-        if (isLetter(char)) {
-            const startLine = line;
-            const startColumn = column;
+        // ------------------------------------------
+        // NÚMEROS
+        // ------------------------------------------
 
-            let start = i;
+        if (/[0-9]/.test(char)) {
+
+            const inicioLinea = linea;
+            const inicioColumna = columna;
+
+            let numero = "";
 
             while (
                 i < source.length &&
-                /[A-Za-zÁÉÍÓÚáéíóúÑñ_0-9]/.test(source[i])
+                /[0-9.]/.test(source[i])
             ) {
-                i++;
-                column++;
-            }
 
-            const value = source.slice(start, i);
-
-            let type = "identifier";
-
-            if (keywords.has(value)) {
-                type = "keyword";
+                numero += source[i];
+                avanzar();
             }
 
             if (
-                [
-                    "GET",
-                    "POST",
-                    "PUT",
-                    "PATCH",
-                    "DELETE",
-                    "HEAD",
-                    "OPTIONS"
-                ].includes(value)
+                numero === "." ||
+                (numero.match(/\./g) || []).length > 1
             ) {
-                type = "method";
+                throw new Error(
+                    `Número inválido en línea ${inicioLinea}, columna ${inicioColumna}.`
+                );
             }
 
-            add(
-                type,
-                value,
-                startLine,
-                startColumn
+            agregar(
+                "NUMBER",
+                Number(numero),
+                inicioLinea,
+                inicioColumna
             );
 
             continue;
         }
 
-        /*
-         * OPERADORES DE DOS CARACTERES
-         */
 
-        const two = source.slice(i, i + 2);
+        // ------------------------------------------
+        // IDENTIFICADORES / PALABRAS
+        // ------------------------------------------
+
+        if (
+            /[A-Za-zÁÉÍÓÚáéíóúÑñ_]/.test(char)
+        ) {
+
+            const inicioLinea = linea;
+            const inicioColumna = columna;
+
+            let palabra = "";
+
+            while (
+                i < source.length &&
+                /[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_]/.test(source[i])
+            ) {
+
+                palabra += source[i];
+                avanzar();
+            }
+
+            const mayuscula = palabra.toUpperCase();
+
+            if (HTTP_METHODS.has(mayuscula)) {
+
+                agregar(
+                    "HTTP_METHOD",
+                    mayuscula,
+                    inicioLinea,
+                    inicioColumna
+                );
+
+            } else if (KEYWORDS.has(palabra.toLowerCase())) {
+
+                agregar(
+                    "KEYWORD",
+                    palabra,
+                    inicioLinea,
+                    inicioColumna
+                );
+
+            } else {
+
+                agregar(
+                    "IDENTIFIER",
+                    palabra,
+                    inicioLinea,
+                    inicioColumna
+                );
+            }
+
+            continue;
+        }
+
+
+        // ------------------------------------------
+        // OPERADORES DE DOS CARACTERES
+        // ------------------------------------------
+
+        const dos = source.slice(i, i + 2);
+
+        if (
+            dos === "==" ||
+            dos === "!=" ||
+            dos === "<=" ||
+            dos === ">=" ||
+            dos === "&&" ||
+            dos === "||" ||
+            dos === "+=" ||
+            dos === "-=" ||
+            dos === "*=" ||
+            dos === "/="
+        ) {
+
+            agregar(
+                "OPERATOR",
+                dos,
+                linea,
+                columna
+            );
+
+            avanzar();
+            avanzar();
+
+            continue;
+        }
+
+
+        // ------------------------------------------
+        // OPERADORES DE UN CARÁCTER
+        // ------------------------------------------
 
         if (
             [
-                "==",
-                "!=",
-                "<=",
-                ">=",
-                "&&",
-                "||",
-                "+=",
-                "-=",
-                "*=",
-                "/="
-            ].includes(two)
+                "=",
+                "+",
+                "-",
+                "*",
+                "/",
+                "%",
+                "<",
+                ">",
+                "!"
+            ].includes(char)
         ) {
-            add("operator", two);
 
-            i += 2;
-            column += 2;
+            agregar(
+                "OPERATOR",
+                char,
+                linea,
+                columna
+            );
 
+            avanzar();
             continue;
         }
 
-        /*
-         * OPERADORES / SÍMBOLOS
-         */
+
+        // ------------------------------------------
+        // PUNTUACIÓN
+        // ------------------------------------------
 
         if (
-            "=+-*/><:(),.[]{}%"
-                .includes(char)
+            [
+                "(",
+                ")",
+                "[",
+                "]",
+                "{",
+                "}",
+                ":",
+                ",",
+                "."
+            ].includes(char)
         ) {
-            add("operator", char);
 
-            i++;
-            column++;
+            agregar(
+                "PUNCTUATION",
+                char,
+                linea,
+                columna
+            );
 
+            avanzar();
             continue;
         }
 
-        /*
-         * CARÁCTER DESCONOCIDO
-         */
 
-        add(
-            "unknown",
-            char,
-            line,
-            column
+        // ------------------------------------------
+        // CARÁCTER DESCONOCIDO
+        // ------------------------------------------
+
+        throw new Error(
+            `Carácter no reconocido "${char}" en línea ${linea}, columna ${columna}.`
         );
-
-        i++;
-        column++;
     }
+
+    // ------------------------------------------
+    // FIN DEL ARCHIVO
+    // ------------------------------------------
+
+    tokens.push({
+        type: "EOF",
+        value: null,
+        line: linea,
+        column: columna
+    });
 
     return tokens;
 }
+
+
+// ==========================================
+// ALIAS COMPATIBLE
+// ==========================================
+
+export const analizar = tokenizar;
