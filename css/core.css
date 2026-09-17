@@ -1,3 +1,8 @@
+/* ============================================================
+   CodEsp
+   Windows XP + Frutiger Aero
+   ============================================================ */
+
 * {
     box-sizing: border-box;
 }
@@ -5,278 +10,1044 @@
 html,
 body {
     margin: 0;
+    padding: 0;
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+}
+
+body {
     font-family: Tahoma, Arial, sans-serif;
-    background: #25282b;
-    color: #d8dadd;
-    font-size: 13px;
+
+    color: #10243a;
+
+    background:
+        linear-gradient(
+            180deg,
+            #3aa9e8 0%,
+            #8bd8f5 35%,
+            #d8f5ff 70%,
+            #ffffff 100%
+        );
+
+    overflow-x: hidden;
 }
 
-button,
-input,
-textarea {
-    font: inherit;
+
+/* ============================================================
+   APP
+   ============================================================ */
+
+#app {
+    min-height: 100vh;
 }
 
-button {
-    color: #d9dcdf;
-    background: #34383c;
-    border: 1px solid #111;
-    border-top-color: #60676d;
-    border-left-color: #60676d;
-    padding: 6px 10px;
-    cursor: pointer;
-}
 
-button:hover {
-    background: #41464b;
-}
-
-button:active {
-    border-top-color: #111;
-    border-left-color: #111;
-    border-right-color: #666;
-    border-bottom-color: #666;
-}
-
-button.primary {
-    background: #4b5963;
-    border-top-color: #7a8993;
-    border-left-color: #7a8993;
-}
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
 
 .top {
     height: 54px;
+
     display: flex;
     align-items: center;
-    gap: 18px;
-    padding: 0 12px;
-    background: #303438;
-    border-bottom: 1px solid #0b0c0d;
+
+    padding: 0 8px;
+
+    gap: 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #2f9ee4 0%,
+            #1674c5 45%,
+            #075aa9 50%,
+            #0a69bd 100%
+        );
+
+    border-bottom: 2px solid #064b8f;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(0,0,0,.25),
+        0 2px 5px rgba(0,60,120,.35);
+
+    color: white;
+
+    position: relative;
+
+    z-index: 20;
 }
 
+
+/* ============================================================
+   MARCA
+   ============================================================ */
+
 .brand {
+    height: 40px;
+
     display: flex;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    font-size: 18px;
-    font-weight: bold;
+
+    gap: 7px;
+
+    padding: 3px 10px 3px 5px;
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.22),
+            rgba(255,255,255,.04)
+        );
+
+    border: 1px solid rgba(255,255,255,.35);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.4);
 }
 
 .brand-mark {
-    padding: 4px 5px;
-    background: #b6c0c7;
-    color: #1c2023;
-    border: 1px solid #090a0b;
-    font: bold 11px Consolas, monospace;
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 5px;
+
+    font-weight: bold;
+    font-size: 13px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            180deg,
+            #69c9ff,
+            #0877c9
+        );
+
+    border: 1px solid #07599a;
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.7),
+        inset -1px -1px 0 rgba(0,0,0,.3);
+}
+
+.brand > span:not(.brand-mark) {
+    font-size: 17px;
+    font-weight: bold;
+
+    text-shadow:
+        1px 1px 2px rgba(0,40,90,.65);
 }
 
 .brand small {
-    margin-left: 3px;
-    color: #899298;
-    font: 10px Consolas, monospace;
+    font-size: 9px;
+
+    padding: 2px 4px;
+
+    border-radius: 3px;
+
+    background: rgba(0,55,110,.35);
+
+    border: 1px solid rgba(255,255,255,.2);
+
+    color: #dff5ff;
 }
 
-nav {
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+#main-nav {
     display: flex;
-    flex: 1;
+    align-items: center;
+
     gap: 3px;
+
+    flex: 1;
 }
 
-nav button {
+#main-nav button {
+    appearance: none;
+
+    border: 1px solid transparent;
+
     background: transparent;
-    border-color: transparent;
-    color: #aeb5ba;
+
+    color: #e9f7ff;
+
+    font-family: Tahoma, Arial, sans-serif;
+
+    font-size: 12px;
+
+    padding: 7px 12px;
+
+    border-radius: 4px;
+
+    cursor: pointer;
+
+    text-shadow:
+        1px 1px 1px rgba(0,50,100,.6);
 }
 
-nav button:hover,
-nav button.active {
-    background: #3b4045;
-    color: #fff;
-    border-color: #111 #666 #111 #666;
+#main-nav button:hover {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.28),
+            rgba(255,255,255,.08)
+        );
+
+    border-color:
+        rgba(255,255,255,.3);
 }
+
+#main-nav button.active {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #d9efff
+        );
+
+    color: #064d91;
+
+    border: 1px solid #8bc9ed;
+
+    text-shadow: none;
+
+    box-shadow:
+        inset 0 1px 0 white,
+        0 1px 2px rgba(0,0,0,.25);
+}
+
+
+/* ============================================================
+   ACCIONES SUPERIORES
+   ============================================================ */
 
 .top-actions {
     display: flex;
+
+    align-items: center;
+
     gap: 5px;
 }
 
-.icon-btn {
-    display: none;
+
+/* ============================================================
+   BOTONES XP
+   ============================================================ */
+
+button {
+    font-family: Tahoma, Arial, sans-serif;
+
+    cursor: pointer;
 }
+
+button.primary {
+    color: white;
+
+    font-weight: bold;
+
+    background:
+        linear-gradient(
+            180deg,
+            #8de243 0%,
+            #54bd20 45%,
+            #36980e 50%,
+            #48ad16 100%
+        );
+
+    border: 1px solid #277a09;
+
+    border-radius: 5px;
+
+    padding: 7px 13px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.75),
+        inset 0 -1px 0 rgba(0,0,0,.2),
+        0 1px 2px rgba(0,0,0,.3);
+
+    text-shadow:
+        1px 1px 1px rgba(0,60,0,.5);
+}
+
+button.primary:hover {
+    background:
+        linear-gradient(
+            180deg,
+            #a1ee5b,
+            #63ca2b,
+            #43a915
+        );
+}
+
+button.primary:active {
+    transform: translateY(1px);
+
+    box-shadow:
+        inset 0 2px 3px rgba(0,0,0,.25);
+}
+
+
+/* ============================================================
+   BOTÓN NORMAL
+   ============================================================ */
+
+.toolbar button,
+.page-actions button,
+.icon-btn,
+.file-row,
+.bottom-tabs button {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #edf7fc 45%,
+            #d1e5f0 50%,
+            #e7f3f8 100%
+        );
+
+    color: #123b5d;
+
+    border: 1px solid #7fa8c0;
+
+    border-radius: 4px;
+
+    box-shadow:
+        inset 0 1px 0 white,
+        inset 0 -1px 0 rgba(70,110,140,.25),
+        0 1px 2px rgba(0,50,90,.18);
+}
+
+.toolbar button:hover,
+.page-actions button:hover,
+.icon-btn:hover,
+.file-row:hover,
+.bottom-tabs button:hover {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #e8f8ff,
+            #c7eaff
+        );
+
+    border-color: #4e99c5;
+}
+
+.toolbar button:active,
+.page-actions button:active,
+.icon-btn:active {
+    box-shadow:
+        inset 0 2px 3px rgba(0,50,90,.22);
+}
+
+
+/* ============================================================
+   MENÚ MÓVIL
+   ============================================================ */
+
+.icon-btn {
+    width: 36px;
+    height: 34px;
+
+    font-size: 17px;
+
+    padding: 0;
+}
+
+
+/* ============================================================
+   WORKSPACE
+   ============================================================ */
+
+#workspace {
+    min-height: calc(100vh - 54px);
+
+    padding: 8px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.55),
+            rgba(255,255,255,.85)
+        );
+}
+
+
+/* ============================================================
+   VISTAS
+   ============================================================ */
 
 .view {
-    height: calc(100vh - 54px);
-    min-height: 500px;
+    min-height: calc(100vh - 70px);
 }
+
+
+/* ============================================================
+   PANELES
+   ============================================================ */
 
 .panel {
-    background: #292c2f;
-    border-right: 1px solid #111;
-    min-width: 0;
+    background:
+        linear-gradient(
+            180deg,
+            #f7fcff 0%,
+            #eaf5fa 100%
+        );
+
+    border: 1px solid #76a4be;
+
+    border-radius: 5px;
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        inset -1px -1px 0 rgba(100,140,165,.3),
+        0 2px 5px rgba(0,70,110,.2);
+
+    overflow: hidden;
 }
+
+
+/* ============================================================
+   TÍTULOS DE PANEL
+   ============================================================ */
 
 .panel-title {
-    height: 28px;
-    padding: 7px 9px;
-    background: #34383c;
-    border-bottom: 1px solid #111;
-    color: #aeb6bc;
-    font: bold 10px Consolas, monospace;
-    letter-spacing: 1px;
+    min-height: 30px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 9px;
+
+    color: white;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    letter-spacing: .5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #55b8ed,
+            #1881c7 48%,
+            #0870b9 52%,
+            #2094d2
+        );
+
+    border-bottom: 1px solid #075a98;
+
+    text-shadow:
+        1px 1px 1px rgba(0,50,100,.65);
 }
 
-.generic-view {
-    height: 100%;
-    padding: 22px;
+
+/* ============================================================
+   EDITOR
+   ============================================================ */
+
+.code-panel {
+    background: #102333;
+
+    border: 1px solid #397b9e;
+
+    border-radius: 4px;
+
+    box-shadow:
+        0 2px 6px rgba(0,60,100,.3),
+        inset 0 1px 0 rgba(255,255,255,.12);
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   TAB
+   ============================================================ */
+
+.tabbar {
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 9px;
+
+    color: #154b6e;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #d9edf8
+        );
+
+    border-bottom: 1px solid #83abc1;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
+.tab-path {
+    color: #6a8ba0;
+
+    font-weight: normal;
+}
+
+
+/* ============================================================
+   STATUS BAR
+   ============================================================ */
+
+.editor-status {
+    min-height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 0 8px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #d9edf7,
+            #c1dce9
+        );
+
+    border-top: 1px solid #78a4b9;
+
+    color: #31566d;
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   BOTTOM
+   ============================================================ */
+
+.bottom {
+    margin-top: 7px;
+
+    border: 1px solid #76a4be;
+
+    border-radius: 5px;
+
+    background: #edf7fb;
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        0 2px 5px rgba(0,70,110,.18);
+
+    overflow: hidden;
+}
+
+.bottom-tabs {
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 2px;
+
+    padding: 3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e9f6fc,
+            #cbdfea
+        );
+
+    border-bottom: 1px solid #86aabd;
+}
+
+.bottom-tabs button {
+    padding: 4px 9px;
+
+    font-size: 10px;
+
+    border-radius: 3px;
+}
+
+.bottom-tabs button.active {
+    color: #064d8c;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #d7edfa
+        );
+
+    border-color: #5797bb;
+
+    font-weight: bold;
+}
+
+.bottom-content {
+    min-height: 80px;
+
+    max-height: 220px;
+
     overflow: auto;
+
+    background:
+        linear-gradient(
+            180deg,
+            #f8fdff,
+            #eaf5fa
+        );
+}
+
+
+/* ============================================================
+   CONSOLA
+   ============================================================ */
+
+.console-line {
+    display: flex;
+
+    gap: 8px;
+
+    padding: 4px 8px;
+
+    border-bottom: 1px solid #d1e4ed;
+
+    font-size: 11px;
+}
+
+.console-line pre {
+    margin: 0;
+
+    white-space: pre-wrap;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+}
+
+.console-prefix {
+    width: 14px;
+
+    text-align: center;
+
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   FILAS DE ARCHIVOS
+   ============================================================ */
+
+.file-row {
+    width: 100%;
+
+    min-height: 29px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 4px 7px;
+
+    text-align: left;
+
+    border-radius: 0;
+
+    border-width: 0 0 1px 0;
+
+    font-size: 11px;
+}
+
+.file-row.active {
+    color: #073f75;
+
+    background:
+        linear-gradient(
+            180deg,
+            #d9f2ff,
+            #a8dfff
+        );
+
+    border-bottom-color: #78b7d8;
+
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   VARIABLES
+   ============================================================ */
+
+.variable-row {
+    padding: 5px 7px;
+
+    border-bottom: 1px solid #c9dfe9;
+
+    font-size: 11px;
+}
+
+.variable-row b {
+    color: #075d9b;
+}
+
+.variable-row pre {
+    margin: 3px 0 0;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    white-space: pre-wrap;
+
+    color: #29475c;
+}
+
+
+/* ============================================================
+   INSPECTOR
+   ============================================================ */
+
+.inspect-section {
+    padding: 8px;
+
+    border-bottom: 1px solid #c8dfe9;
+
+    font-size: 11px;
+}
+
+.inspect-section > b {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #0870b7;
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   AST
+   ============================================================ */
+
+#astInfo {
+    margin: 0;
+
+    max-height: 300px;
+
+    overflow: auto;
+
+    padding: 5px;
+
+    color: #28546c;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   RED
+   ============================================================ */
+
+.network-row {
+    display: grid;
+
+    grid-template-columns:
+        70px
+        minmax(0, 1fr)
+        50px
+        70px;
+
+    gap: 8px;
+
+    padding: 5px 8px;
+
+    border-bottom: 1px solid #c9dfe9;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 10px;
+}
+
+.network-row strong {
+    color: #0873b9;
+}
+
+
+/* ============================================================
+   ERRORES
+   ============================================================ */
+
+.error-entry {
+    padding: 7px 9px;
+
+    border-bottom: 1px solid #e2caca;
+
+    background: #fff4f4;
+
+    color: #8b2929;
+
+    font-size: 11px;
+}
+
+.error-entry pre {
+    white-space: pre-wrap;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   ESTADOS VACÍOS
+   ============================================================ */
+
+.empty-state {
+    padding: 25px;
+
+    text-align: center;
+
+    color: #638399;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   PÁGINAS
+   ============================================================ */
+
+.generic-view {
+    padding: 4px;
 }
 
 .page-head {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 18px;
-}
 
-.eyebrow {
-    color: #78848b;
-    font: 10px Consolas, monospace;
-    letter-spacing: 1.5px;
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 8px;
+
+    padding: 12px;
+
+    border: 1px solid #76a4be;
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.96),
+            rgba(220,242,251,.94)
+        );
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        0 2px 4px rgba(0,70,110,.15);
 }
 
 .page-head h1 {
-    margin: 5px 0;
-    font-size: 22px;
-    font-weight: normal;
+    margin: 2px 0 3px;
+
+    color: #075e9d;
+
+    font-size: 20px;
+
+    text-shadow:
+        1px 1px 0 white;
 }
 
 .page-head p {
     margin: 0;
-    color: #8f989e;
+
+    color: #55758a;
+
+    font-size: 11px;
 }
 
-.page-actions {
-    display: flex;
-    gap: 5px;
+.eyebrow {
+    color: #1686c5;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
 }
 
-.empty-state {
-    padding: 20px;
-    color: #777f84;
+
+/* ============================================================
+   ENLACES / TEXTO
+   ============================================================ */
+
+a {
+    color: #0876bd;
 }
 
-@media (max-width: 850px) {
+a:hover {
+    color: #00518b;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+    width: 13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-track {
+    background: #d8eaf2;
+}
+
+::-webkit-scrollbar-thumb {
+    background:
+        linear-gradient(
+            90deg,
+            #b7d7e6,
+            #7faec6
+        );
+
+    border: 1px solid #6c9bb5;
+
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(
+            90deg,
+            #c8e8f5,
+            #91bfd5
+        );
+}
+
+
+/* ============================================================
+   SELECCIÓN
+   ============================================================ */
+
+::selection {
+    background: #80c9f0;
+    color: #063e68;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 800px) {
+
     .top {
-        height: 50px;
+        height: 54px;
     }
 
-    .top nav {
+    .brand small {
         display: none;
     }
 
-    .top nav.mobile-open {
+    #main-nav {
+        display: none;
+
         position: absolute;
-        top: 50px;
+
+        top: 54px;
         left: 0;
         right: 0;
-        z-index: 100;
-        display: flex;
+
         padding: 6px;
-        background: #303438;
-        border-bottom: 1px solid #111;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        background:
+            linear-gradient(
+                180deg,
+                #208fd0,
+                #075fa9
+            );
+
+        border-bottom: 2px solid #064b8f;
+
+        box-shadow:
+            0 3px 7px rgba(0,50,100,.3);
+    }
+
+    #main-nav.mobile-open {
+        display: flex;
+    }
+
+    #main-nav button {
+        text-align: left;
+
+        width: 100%;
     }
 
     .top-actions {
         margin-left: auto;
     }
 
-    .icon-btn {
-        display: block;
-    }
-
-    .view {
-        height: calc(100vh - 50px);
-    }
-
-    .generic-view {
-        padding: 14px;
+    #workspace {
+        padding: 5px;
     }
 
     .page-head {
         flex-direction: column;
+
+        align-items: stretch;
     }
 
-    .page-actions {
-        flex-wrap: wrap;
+    .network-row {
+        grid-template-columns:
+            60px
+            minmax(0,1fr)
+            40px;
     }
 
-    .brand small {
+    .network-row span:last-child {
         display: none;
     }
-}
-
-@media (max-width: 500px) {
-    .brand {
-        font-size: 16px;
-    }
-
-    .generic-view {
-        padding: 10px;
-    }
-}
-
-/* ============================================================
-   PANTALLA DE INICIO
-   ============================================================ */
-
-.boot-screen {
-    min-height: calc(100vh - 54px);
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 8px;
-
-    color: #9da6b0;
-
-    font-family:
-        Arial,
-        sans-serif;
-}
-
-.boot-logo {
-    width: 58px;
-    height: 58px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 2px solid #6d7782;
-
-    background: #30363d;
-
-    box-shadow:
-        inset 1px 1px 0 #aeb6bd,
-        inset -1px -1px 0 #11151a;
-
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.boot-screen strong {
-    color: #e3e7ea;
-    font-size: 18px;
-}
-
-.boot-screen span {
-    font-size: 12px;
 }
