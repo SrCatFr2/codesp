@@ -1,297 +1,92 @@
 /* ============================================================
-   CodEsp
-   Windows XP + Frutiger Aero
+   FRUTIGER AERO — FONDO DE ESCRITORIO
    ============================================================ */
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100%;
-}
 
 body {
-    font-family: Tahoma, Arial, sans-serif;
-
-    color: #10243a;
-
     background:
         linear-gradient(
             180deg,
-            #3aa9e8 0%,
-            #8bd8f5 35%,
-            #d8f5ff 70%,
-            #ffffff 100%
+            #55bdf3 0%,
+            #9de2f7 42%,
+            #dff7ff 66%,
+            #7acb55 67%,
+            #3f9e35 100%
         );
 
-    overflow-x: hidden;
+    background-attachment: fixed;
+}
+
+/* brillo ambiental */
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at 20% 10%,
+            rgba(255,255,255,.65),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(255,255,255,.35),
+            transparent 20%
+        );
+
+    z-index: -1;
 }
 
 
 /* ============================================================
-   APP
+   BOTÓN DE TEMA
    ============================================================ */
 
-#app {
-    min-height: 100vh;
-}
-
-
-/* ============================================================
-   BARRA SUPERIOR
-   ============================================================ */
-
-.top {
-    height: 54px;
-
-    display: flex;
-    align-items: center;
-
-    padding: 0 8px;
-
-    gap: 10px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #2f9ee4 0%,
-            #1674c5 45%,
-            #075aa9 50%,
-            #0a69bd 100%
-        );
-
-    border-bottom: 2px solid #064b8f;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.65),
-        inset 0 -1px 0 rgba(0,0,0,.25),
-        0 2px 5px rgba(0,60,120,.35);
-
-    color: white;
-
-    position: relative;
-
-    z-index: 20;
-}
-
-
-/* ============================================================
-   MARCA
-   ============================================================ */
-
-.brand {
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 3px 10px 3px 5px;
-
-    border-radius: 5px;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,.22),
-            rgba(255,255,255,.04)
-        );
-
-    border: 1px solid rgba(255,255,255,.35);
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.4);
-}
-
-.brand-mark {
-    width: 32px;
+.theme-btn {
+    width: 34px;
     height: 32px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0;
 
     border-radius: 5px;
 
-    font-weight: bold;
-    font-size: 13px;
-
-    color: white;
-
-    background:
-        linear-gradient(
-            180deg,
-            #69c9ff,
-            #0877c9
-        );
+    font-size: 15px;
 
     border: 1px solid #07599a;
 
-    box-shadow:
-        inset 1px 1px 0 rgba(255,255,255,.7),
-        inset -1px -1px 0 rgba(0,0,0,.3);
-}
-
-.brand > span:not(.brand-mark) {
-    font-size: 17px;
-    font-weight: bold;
-
-    text-shadow:
-        1px 1px 2px rgba(0,40,90,.65);
-}
-
-.brand small {
-    font-size: 9px;
-
-    padding: 2px 4px;
-
-    border-radius: 3px;
-
-    background: rgba(0,55,110,.35);
-
-    border: 1px solid rgba(255,255,255,.2);
-
-    color: #dff5ff;
-}
-
-
-/* ============================================================
-   NAVEGACIÓN
-   ============================================================ */
-
-#main-nav {
-    display: flex;
-    align-items: center;
-
-    gap: 3px;
-
-    flex: 1;
-}
-
-#main-nav button {
-    appearance: none;
-
-    border: 1px solid transparent;
-
-    background: transparent;
-
-    color: #e9f7ff;
-
-    font-family: Tahoma, Arial, sans-serif;
-
-    font-size: 12px;
-
-    padding: 7px 12px;
-
-    border-radius: 4px;
-
-    cursor: pointer;
-
-    text-shadow:
-        1px 1px 1px rgba(0,50,100,.6);
-}
-
-#main-nav button:hover {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,.28),
-            rgba(255,255,255,.08)
-        );
-
-    border-color:
-        rgba(255,255,255,.3);
-}
-
-#main-nav button.active {
     background:
         linear-gradient(
             180deg,
             #ffffff,
-            #d9efff
+            #d9f2ff 45%,
+            #9bcce5 50%,
+            #d8edf7
         );
-
-    color: #064d91;
-
-    border: 1px solid #8bc9ed;
-
-    text-shadow: none;
 
     box-shadow:
         inset 0 1px 0 white,
-        0 1px 2px rgba(0,0,0,.25);
-}
-
-
-/* ============================================================
-   ACCIONES SUPERIORES
-   ============================================================ */
-
-.top-actions {
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-}
-
-
-/* ============================================================
-   BOTONES XP
-   ============================================================ */
-
-button {
-    font-family: Tahoma, Arial, sans-serif;
+        inset 0 -1px 0 rgba(0,0,0,.2),
+        0 1px 2px rgba(0,50,100,.3);
 
     cursor: pointer;
 }
 
-button.primary {
-    color: white;
-
-    font-weight: bold;
-
+.theme-btn:hover {
     background:
         linear-gradient(
             180deg,
-            #8de243 0%,
-            #54bd20 45%,
-            #36980e 50%,
-            #48ad16 100%
-        );
-
-    border: 1px solid #277a09;
-
-    border-radius: 5px;
-
-    padding: 7px 13px;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.75),
-        inset 0 -1px 0 rgba(0,0,0,.2),
-        0 1px 2px rgba(0,0,0,.3);
-
-    text-shadow:
-        1px 1px 1px rgba(0,60,0,.5);
-}
-
-button.primary:hover {
-    background:
-        linear-gradient(
-            180deg,
-            #a1ee5b,
-            #63ca2b,
-            #43a915
+            #ffffff,
+            #eafaff,
+            #b5e4f8
         );
 }
 
-button.primary:active {
+.theme-btn:active {
     transform: translateY(1px);
 
     box-shadow:
@@ -300,97 +95,76 @@ button.primary:active {
 
 
 /* ============================================================
-   BOTÓN NORMAL
+   TEMA OSCURO
    ============================================================ */
 
-.toolbar button,
-.page-actions button,
-.icon-btn,
-.file-row,
-.bottom-tabs button {
+body.dark-mode {
+
+    color: #d8e7f3;
+
     background:
         linear-gradient(
             180deg,
-            #ffffff 0%,
-            #edf7fc 45%,
-            #d1e5f0 50%,
-            #e7f3f8 100%
+            #071827 0%,
+            #0b2638 40%,
+            #102d3d 70%,
+            #142f27 100%
         );
 
-    color: #123b5d;
+    background-attachment: fixed;
+}
 
-    border: 1px solid #7fa8c0;
 
-    border-radius: 4px;
+/* Ambiente mucho más suave */
+
+body.dark-mode::before {
+    background:
+        radial-gradient(
+            circle at 20% 10%,
+            rgba(70,150,200,.12),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(40,120,150,.08),
+            transparent 25%
+        );
+}
+
+
+/* ============================================================
+   BARRA XP OSCURA
+   ============================================================ */
+
+body.dark-mode .top {
+    background:
+        linear-gradient(
+            180deg,
+            #17669a,
+            #0d4d7b 48%,
+            #083b60 52%,
+            #0d4d79
+        );
+
+    border-bottom-color: #062d49;
 
     box-shadow:
-        inset 0 1px 0 white,
-        inset 0 -1px 0 rgba(70,110,140,.25),
-        0 1px 2px rgba(0,50,90,.18);
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 2px 7px rgba(0,0,0,.45);
 }
 
-.toolbar button:hover,
-.page-actions button:hover,
-.icon-btn:hover,
-.file-row:hover,
-.bottom-tabs button:hover {
+
+/* ============================================================
+   ESPACIO PRINCIPAL
+   ============================================================ */
+
+body.dark-mode #workspace {
     background:
         linear-gradient(
             180deg,
-            #ffffff,
-            #e8f8ff,
-            #c7eaff
+            rgba(8,25,38,.52),
+            rgba(5,18,28,.72)
         );
-
-    border-color: #4e99c5;
-}
-
-.toolbar button:active,
-.page-actions button:active,
-.icon-btn:active {
-    box-shadow:
-        inset 0 2px 3px rgba(0,50,90,.22);
-}
-
-
-/* ============================================================
-   MENÚ MÓVIL
-   ============================================================ */
-
-.icon-btn {
-    width: 36px;
-    height: 34px;
-
-    font-size: 17px;
-
-    padding: 0;
-}
-
-
-/* ============================================================
-   WORKSPACE
-   ============================================================ */
-
-#workspace {
-    min-height: calc(100vh - 54px);
-
-    padding: 8px;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,.55),
-            rgba(255,255,255,.85)
-        );
-}
-
-
-/* ============================================================
-   VISTAS
-   ============================================================ */
-
-.view {
-    min-height: calc(100vh - 70px);
 }
 
 
@@ -398,60 +172,42 @@ button.primary:active {
    PANELES
    ============================================================ */
 
-.panel {
+body.dark-mode .panel {
+
     background:
         linear-gradient(
             180deg,
-            #f7fcff 0%,
-            #eaf5fa 100%
+            #1d3444,
+            #142936
         );
 
-    border: 1px solid #76a4be;
-
-    border-radius: 5px;
+    border-color: #38677f;
 
     box-shadow:
-        inset 1px 1px 0 white,
-        inset -1px -1px 0 rgba(100,140,165,.3),
-        0 2px 5px rgba(0,70,110,.2);
+        inset 1px 1px 0 rgba(255,255,255,.09),
+        inset -1px -1px 0 rgba(0,0,0,.4),
+        0 2px 7px rgba(0,0,0,.45);
 
-    overflow: hidden;
+    color: #d5e5ef;
 }
 
 
 /* ============================================================
-   TÍTULOS DE PANEL
+   TÍTULOS DE PANELES
    ============================================================ */
 
-.panel-title {
-    min-height: 30px;
-
-    display: flex;
-    align-items: center;
-
-    padding: 0 9px;
-
-    color: white;
-
-    font-size: 10px;
-
-    font-weight: bold;
-
-    letter-spacing: .5px;
+body.dark-mode .panel-title {
 
     background:
         linear-gradient(
             180deg,
-            #55b8ed,
-            #1881c7 48%,
-            #0870b9 52%,
-            #2094d2
+            #247eaf,
+            #155e89 48%,
+            #104d72 52%,
+            #17658e
         );
 
-    border-bottom: 1px solid #075a98;
-
-    text-shadow:
-        1px 1px 1px rgba(0,50,100,.65);
+    border-bottom-color: #0b3d5b;
 }
 
 
@@ -459,18 +215,15 @@ button.primary:active {
    EDITOR
    ============================================================ */
 
-.code-panel {
-    background: #102333;
+body.dark-mode .code-panel {
 
-    border: 1px solid #397b9e;
+    background: #091722;
 
-    border-radius: 4px;
+    border-color: #285b76;
 
     box-shadow:
-        0 2px 6px rgba(0,60,100,.3),
-        inset 0 1px 0 rgba(255,255,255,.12);
-
-    overflow: hidden;
+        inset 0 1px 0 rgba(255,255,255,.07),
+        0 3px 9px rgba(0,0,0,.5);
 }
 
 
@@ -478,65 +231,128 @@ button.primary:active {
    TAB
    ============================================================ */
 
-.tabbar {
-    height: 30px;
+body.dark-mode .tabbar {
 
-    display: flex;
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 0 9px;
-
-    color: #154b6e;
+    color: #b8d8e9;
 
     background:
         linear-gradient(
             180deg,
-            #ffffff,
-            #d9edf8
+            #203e51,
+            #172f3e
         );
 
-    border-bottom: 1px solid #83abc1;
-
-    font-size: 11px;
-
-    font-weight: bold;
+    border-bottom-color: #35657d;
 }
 
-.tab-path {
-    color: #6a8ba0;
-
-    font-weight: normal;
+body.dark-mode .tab-path {
+    color: #7898a9;
 }
 
 
 /* ============================================================
-   STATUS BAR
+   STATUS
    ============================================================ */
 
-.editor-status {
-    min-height: 24px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 0 8px;
+body.dark-mode .editor-status {
 
     background:
         linear-gradient(
             180deg,
-            #d9edf7,
-            #c1dce9
+            #1a3545,
+            #132936
         );
 
-    border-top: 1px solid #78a4b9;
+    border-top-color: #31596e;
 
-    color: #31566d;
+    color: #91b1c2;
+}
 
-    font-size: 10px;
+
+/* ============================================================
+   BOTONES NORMALES
+   ============================================================ */
+
+body.dark-mode .toolbar button,
+body.dark-mode .page-actions button,
+body.dark-mode .icon-btn,
+body.dark-mode .file-row,
+body.dark-mode .bottom-tabs button,
+body.dark-mode .theme-btn {
+
+    color: #cce5f2;
+
+    background:
+        linear-gradient(
+            180deg,
+            #315264,
+            #263f4f 45%,
+            #1c3442 50%,
+            #294757
+        );
+
+    border-color: #416d82;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.15),
+        inset 0 -1px 0 rgba(0,0,0,.4),
+        0 1px 2px rgba(0,0,0,.4);
+}
+
+body.dark-mode .toolbar button:hover,
+body.dark-mode .page-actions button:hover,
+body.dark-mode .icon-btn:hover,
+body.dark-mode .file-row:hover,
+body.dark-mode .bottom-tabs button:hover,
+body.dark-mode .theme-btn:hover {
+
+    background:
+        linear-gradient(
+            180deg,
+            #3d657a,
+            #315366,
+            #274655
+        );
+
+    border-color: #5790ac;
+}
+
+
+/* ============================================================
+   BOTÓN EJECUTAR
+   ============================================================ */
+
+body.dark-mode button.primary {
+
+    background:
+        linear-gradient(
+            180deg,
+            #75c93d,
+            #4d9e20 48%,
+            #397b16 52%,
+            #4b9d1d
+        );
+
+    border-color: #2d6810;
+}
+
+
+/* ============================================================
+   FILA ACTIVA
+   ============================================================ */
+
+body.dark-mode .file-row.active {
+
+    color: #e5f6ff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #236f9d,
+            #17577e
+        );
+
+    border-bottom-color: #317da8;
 }
 
 
@@ -544,77 +360,55 @@ button.primary:active {
    BOTTOM
    ============================================================ */
 
-.bottom {
-    margin-top: 7px;
+body.dark-mode .bottom {
 
-    border: 1px solid #76a4be;
+    background: #132936;
 
-    border-radius: 5px;
-
-    background: #edf7fb;
+    border-color: #38677f;
 
     box-shadow:
-        inset 1px 1px 0 white,
-        0 2px 5px rgba(0,70,110,.18);
-
-    overflow: hidden;
+        inset 1px 1px 0 rgba(255,255,255,.08),
+        0 3px 8px rgba(0,0,0,.45);
 }
 
-.bottom-tabs {
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 2px;
-
-    padding: 3px;
+body.dark-mode .bottom-tabs {
 
     background:
         linear-gradient(
             180deg,
-            #e9f6fc,
-            #cbdfea
+            #254555,
+            #1a3442
         );
 
-    border-bottom: 1px solid #86aabd;
+    border-bottom-color: #355b70;
 }
 
-.bottom-tabs button {
-    padding: 4px 9px;
+body.dark-mode .bottom-tabs button.active {
 
-    font-size: 10px;
-
-    border-radius: 3px;
-}
-
-.bottom-tabs button.active {
-    color: #064d8c;
+    color: #d7f1ff;
 
     background:
         linear-gradient(
             180deg,
-            #ffffff,
-            #d7edfa
+            #315d73,
+            #24485b
         );
 
-    border-color: #5797bb;
-
-    font-weight: bold;
+    border-color: #4d8199;
 }
 
-.bottom-content {
-    min-height: 80px;
 
-    max-height: 220px;
+/* ============================================================
+   CONTENIDO INFERIOR
+   ============================================================ */
 
-    overflow: auto;
+body.dark-mode .bottom-content {
 
     background:
         linear-gradient(
             180deg,
-            #f8fdff,
-            #eaf5fa
+            #112532,
+            #0e202b
         );
 }
 
@@ -623,76 +417,11 @@ button.primary:active {
    CONSOLA
    ============================================================ */
 
-.console-line {
-    display: flex;
+body.dark-mode .console-line {
 
-    gap: 8px;
+    border-bottom-color: #203b4a;
 
-    padding: 4px 8px;
-
-    border-bottom: 1px solid #d1e4ed;
-
-    font-size: 11px;
-}
-
-.console-line pre {
-    margin: 0;
-
-    white-space: pre-wrap;
-
-    font-family:
-        Consolas,
-        "Courier New",
-        monospace;
-}
-
-.console-prefix {
-    width: 14px;
-
-    text-align: center;
-
-    font-weight: bold;
-}
-
-
-/* ============================================================
-   FILAS DE ARCHIVOS
-   ============================================================ */
-
-.file-row {
-    width: 100%;
-
-    min-height: 29px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 4px 7px;
-
-    text-align: left;
-
-    border-radius: 0;
-
-    border-width: 0 0 1px 0;
-
-    font-size: 11px;
-}
-
-.file-row.active {
-    color: #073f75;
-
-    background:
-        linear-gradient(
-            180deg,
-            #d9f2ff,
-            #a8dfff
-        );
-
-    border-bottom-color: #78b7d8;
-
-    font-weight: bold;
+    color: #c8dce7;
 }
 
 
@@ -700,29 +429,19 @@ button.primary:active {
    VARIABLES
    ============================================================ */
 
-.variable-row {
-    padding: 5px 7px;
+body.dark-mode .variable-row {
 
-    border-bottom: 1px solid #c9dfe9;
-
-    font-size: 11px;
+    border-bottom-color: #284554;
 }
 
-.variable-row b {
-    color: #075d9b;
+body.dark-mode .variable-row b {
+
+    color: #62b9e8;
 }
 
-.variable-row pre {
-    margin: 3px 0 0;
+body.dark-mode .variable-row pre {
 
-    font-family:
-        Consolas,
-        "Courier New",
-        monospace;
-
-    white-space: pre-wrap;
-
-    color: #29475c;
+    color: #aec7d4;
 }
 
 
@@ -730,22 +449,14 @@ button.primary:active {
    INSPECTOR
    ============================================================ */
 
-.inspect-section {
-    padding: 8px;
+body.dark-mode .inspect-section {
 
-    border-bottom: 1px solid #c8dfe9;
-
-    font-size: 11px;
+    border-bottom-color: #284554;
 }
 
-.inspect-section > b {
-    display: block;
+body.dark-mode .inspect-section > b {
 
-    margin-bottom: 5px;
-
-    color: #0870b7;
-
-    font-size: 9px;
+    color: #59b5e7;
 }
 
 
@@ -753,23 +464,9 @@ button.primary:active {
    AST
    ============================================================ */
 
-#astInfo {
-    margin: 0;
+body.dark-mode #astInfo {
 
-    max-height: 300px;
-
-    overflow: auto;
-
-    padding: 5px;
-
-    color: #28546c;
-
-    font-family:
-        Consolas,
-        "Courier New",
-        monospace;
-
-    font-size: 10px;
+    color: #a9c7d7;
 }
 
 
@@ -777,31 +474,16 @@ button.primary:active {
    RED
    ============================================================ */
 
-.network-row {
-    display: grid;
+body.dark-mode .network-row {
 
-    grid-template-columns:
-        70px
-        minmax(0, 1fr)
-        50px
-        70px;
+    border-bottom-color: #294653;
 
-    gap: 8px;
-
-    padding: 5px 8px;
-
-    border-bottom: 1px solid #c9dfe9;
-
-    font-family:
-        Consolas,
-        "Courier New",
-        monospace;
-
-    font-size: 10px;
+    color: #c7dce7;
 }
 
-.network-row strong {
-    color: #0873b9;
+body.dark-mode .network-row strong {
+
+    color: #55b9eb;
 }
 
 
@@ -809,42 +491,13 @@ button.primary:active {
    ERRORES
    ============================================================ */
 
-.error-entry {
-    padding: 7px 9px;
+body.dark-mode .error-entry {
 
-    border-bottom: 1px solid #e2caca;
+    background: #351d21;
 
-    background: #fff4f4;
+    border-bottom-color: #61363b;
 
-    color: #8b2929;
-
-    font-size: 11px;
-}
-
-.error-entry pre {
-    white-space: pre-wrap;
-
-    font-family:
-        Consolas,
-        "Courier New",
-        monospace;
-
-    font-size: 10px;
-}
-
-
-/* ============================================================
-   ESTADOS VACÍOS
-   ============================================================ */
-
-.empty-state {
-    padding: 25px;
-
-    text-align: center;
-
-    color: #638399;
-
-    font-size: 11px;
+    color: #ffb7bd;
 }
 
 
@@ -852,79 +505,48 @@ button.primary:active {
    PÁGINAS
    ============================================================ */
 
-.generic-view {
-    padding: 4px;
-}
-
-.page-head {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 15px;
-
-    margin-bottom: 8px;
-
-    padding: 12px;
-
-    border: 1px solid #76a4be;
-
-    border-radius: 5px;
+body.dark-mode .page-head {
 
     background:
         linear-gradient(
             180deg,
-            rgba(255,255,255,.96),
-            rgba(220,242,251,.94)
+            #203b4c,
+            #172f3d
         );
 
+    border-color: #3d6d83;
+
     box-shadow:
-        inset 1px 1px 0 white,
-        0 2px 4px rgba(0,70,110,.15);
+        inset 1px 1px 0 rgba(255,255,255,.08),
+        0 2px 6px rgba(0,0,0,.4);
 }
 
-.page-head h1 {
-    margin: 2px 0 3px;
+body.dark-mode .page-head h1 {
 
-    color: #075e9d;
-
-    font-size: 20px;
+    color: #6fc5f2;
 
     text-shadow:
-        1px 1px 0 white;
+        1px 1px 0 #071722;
 }
 
-.page-head p {
-    margin: 0;
+body.dark-mode .page-head p {
 
-    color: #55758a;
-
-    font-size: 11px;
+    color: #91adbc;
 }
 
-.eyebrow {
-    color: #1686c5;
+body.dark-mode .eyebrow {
 
-    font-size: 9px;
-
-    font-weight: bold;
-
-    letter-spacing: 1px;
+    color: #54b9e9;
 }
 
 
 /* ============================================================
-   ENLACES / TEXTO
+   EMPTY
    ============================================================ */
 
-a {
-    color: #0876bd;
-}
+body.dark-mode .empty-state {
 
-a:hover {
-    color: #00518b;
+    color: #789aaa;
 }
 
 
@@ -932,35 +554,21 @@ a:hover {
    SCROLLBAR
    ============================================================ */
 
-::-webkit-scrollbar {
-    width: 13px;
-    height: 13px;
+body.dark-mode ::-webkit-scrollbar-track {
+
+    background: #102633;
 }
 
-::-webkit-scrollbar-track {
-    background: #d8eaf2;
-}
+body.dark-mode ::-webkit-scrollbar-thumb {
 
-::-webkit-scrollbar-thumb {
     background:
         linear-gradient(
             90deg,
-            #b7d7e6,
-            #7faec6
+            #31586b,
+            #244758
         );
 
-    border: 1px solid #6c9bb5;
-
-    border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background:
-        linear-gradient(
-            90deg,
-            #c8e8f5,
-            #91bfd5
-        );
+    border-color: #416b7d;
 }
 
 
@@ -968,86 +576,36 @@ a:hover {
    SELECCIÓN
    ============================================================ */
 
-::selection {
-    background: #80c9f0;
-    color: #063e68;
+body.dark-mode ::selection {
+
+    background: #176e9d;
+
+    color: #ffffff;
 }
 
 
 /* ============================================================
-   RESPONSIVE
+   TRANSICIONES SUAVES
    ============================================================ */
 
-@media (max-width: 800px) {
+body,
+.top,
+.panel,
+.page-head,
+.code-panel,
+.tabbar,
+.editor-status,
+.bottom,
+.bottom-tabs,
+.bottom-content,
+.toolbar button,
+.page-actions button,
+.file-row,
+.theme-btn {
 
-    .top {
-        height: 54px;
-    }
-
-    .brand small {
-        display: none;
-    }
-
-    #main-nav {
-        display: none;
-
-        position: absolute;
-
-        top: 54px;
-        left: 0;
-        right: 0;
-
-        padding: 6px;
-
-        flex-direction: column;
-
-        align-items: stretch;
-
-        background:
-            linear-gradient(
-                180deg,
-                #208fd0,
-                #075fa9
-            );
-
-        border-bottom: 2px solid #064b8f;
-
-        box-shadow:
-            0 3px 7px rgba(0,50,100,.3);
-    }
-
-    #main-nav.mobile-open {
-        display: flex;
-    }
-
-    #main-nav button {
-        text-align: left;
-
-        width: 100%;
-    }
-
-    .top-actions {
-        margin-left: auto;
-    }
-
-    #workspace {
-        padding: 5px;
-    }
-
-    .page-head {
-        flex-direction: column;
-
-        align-items: stretch;
-    }
-
-    .network-row {
-        grid-template-columns:
-            60px
-            minmax(0,1fr)
-            40px;
-    }
-
-    .network-row span:last-child {
-        display: none;
-    }
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
 }
