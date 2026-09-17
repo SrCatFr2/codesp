@@ -1,22 +1,55 @@
 /* ============================================================
-   FRUTIGER AERO — FONDO DE ESCRITORIO
+   CodEsp
+   CORE UI
+   Windows XP / Vista + Frutiger Aero
    ============================================================ */
 
-body {
-    background:
-        linear-gradient(
-            180deg,
-            #55bdf3 0%,
-            #9de2f7 42%,
-            #dff7ff 66%,
-            #7acb55 67%,
-            #3f9e35 100%
-        );
 
-    background-attachment: fixed;
+/* ============================================================
+   RESET
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
 }
 
-/* brillo ambiental */
+html {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+
+    font-family:
+        Tahoma,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    color: #16354a;
+
+    background:
+        #5ab8e8
+        url("../assets/frutiger-aero.png")
+        center center / cover
+        fixed
+        no-repeat;
+
+    overflow-x: hidden;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* ============================================================
+   ESCRITORIO AERO
+   ============================================================ */
 
 body::before {
     content: "";
@@ -28,15 +61,34 @@ body::before {
     pointer-events: none;
 
     background:
-        radial-gradient(
-            circle at 20% 10%,
-            rgba(255,255,255,.65),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 80% 20%,
-            rgba(255,255,255,.35),
-            transparent 20%
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.20) 0%,
+            rgba(255,255,255,.05) 35%,
+            rgba(0,80,130,.08) 100%
+        );
+
+    z-index: -1;
+}
+
+body::after {
+    content: "";
+
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 90px;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            180deg,
+            transparent,
+            rgba(0,70,30,.12)
         );
 
     z-index: -1;
@@ -44,53 +96,1200 @@ body::before {
 
 
 /* ============================================================
+   APP
+   ============================================================ */
+
+#app {
+    min-height: 100vh;
+
+    padding: 10px;
+}
+
+
+/* ============================================================
+   VENTANA PRINCIPAL
+   ============================================================ */
+
+#app > .top {
+    position: relative;
+
+    z-index: 50;
+}
+
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+
+.top {
+    min-height: 54px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 5px 7px;
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #62c4f3 0%,
+            #2998dc 17%,
+            #0876c5 47%,
+            #075da7 52%,
+            #147ac3 82%,
+            #3299d6 100%
+        );
+
+    border: 1px solid #07518e;
+
+    border-radius: 7px 7px 3px 3px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.80),
+        inset 0 -1px 0 rgba(0,30,70,.45),
+        0 2px 8px rgba(0,55,90,.38);
+
+    text-shadow:
+        1px 1px 2px rgba(0,40,80,.65);
+}
+
+
+/* ============================================================
+   MARCA
+   ============================================================ */
+
+.brand {
+    min-width: 190px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 3px 9px 3px 4px;
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.30),
+            rgba(255,255,255,.08)
+        );
+
+    border: 1px solid rgba(255,255,255,.34);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.50);
+}
+
+.brand-mark {
+    width: 35px;
+    height: 35px;
+
+    flex: 0 0 35px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    border-radius: 6px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #9ce9ff 0%,
+            #32aee8 42%,
+            #0870bb 100%
+        );
+
+    border: 1px solid #075a99;
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.85),
+        inset -1px -1px 0 rgba(0,35,80,.35),
+        0 1px 2px rgba(0,40,80,.35);
+
+    text-shadow:
+        1px 1px 1px rgba(0,50,90,.55);
+}
+
+.brand > span:not(.brand-mark) {
+    font-size: 18px;
+
+    font-weight: bold;
+
+    letter-spacing: -.3px;
+}
+
+.brand small {
+    margin-left: auto;
+
+    padding: 2px 5px;
+
+    color: #eafaff;
+
+    font-size: 8px;
+
+    letter-spacing: .4px;
+
+    border-radius: 3px;
+
+    background:
+        rgba(0,55,105,.35);
+
+    border: 1px solid rgba(255,255,255,.22);
+}
+
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+#main-nav {
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 2px;
+
+    min-width: 0;
+}
+
+#main-nav button {
+    appearance: none;
+
+    border: 1px solid transparent;
+
+    border-radius: 5px;
+
+    padding: 8px 12px;
+
+    color: #effaff;
+
+    background: transparent;
+
+    font-family: Tahoma, Arial, sans-serif;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    text-shadow:
+        1px 1px 1px rgba(0,45,90,.6);
+}
+
+#main-nav button:hover {
+    border-color:
+        rgba(255,255,255,.35);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.25),
+            rgba(255,255,255,.06)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+#main-nav button.active {
+    color: #084e85;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f4fcff 42%,
+            #c9eaff 52%,
+            #e7f8ff 100%
+        );
+
+    border-color: #7ab4d4;
+
+    text-shadow: none;
+
+    box-shadow:
+        inset 0 1px 0 white,
+        inset 0 -1px 0 rgba(40,100,140,.18),
+        0 1px 2px rgba(0,40,80,.25);
+}
+
+
+/* ============================================================
+   TOP ACTIONS
+   ============================================================ */
+
+.top-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-left: auto;
+}
+
+
+/* ============================================================
+   BOTONES XP
+   ============================================================ */
+
+button {
+    font-family:
+        Tahoma,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+}
+
+button.primary {
+    appearance: none;
+
+    padding: 7px 13px;
+
+    border: 1px solid #287900;
+
+    border-radius: 5px;
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #b2f36a 0%,
+            #75d738 20%,
+            #4dbd1c 48%,
+            #369b0e 53%,
+            #55b91d 80%,
+            #70ca35 100%
+        );
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    text-shadow:
+        1px 1px 1px rgba(0,60,0,.55);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.82),
+        inset 0 -1px 0 rgba(0,70,0,.30),
+        0 1px 3px rgba(0,45,0,.30);
+}
+
+button.primary:hover {
+    background:
+        linear-gradient(
+            180deg,
+            #c4f980,
+            #8ce64d,
+            #58c825,
+            #419f13,
+            #65c52d
+        );
+}
+
+button.primary:active {
+    transform: translateY(1px);
+
+    box-shadow:
+        inset 0 2px 4px rgba(0,55,0,.30);
+}
+
+
+/* ============================================================
    BOTÓN DE TEMA
    ============================================================ */
 
-.theme-btn {
-    width: 34px;
+.theme-btn,
+.icon-btn {
+    appearance: none;
+
+    width: 35px;
     height: 32px;
 
     padding: 0;
 
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #6b9ab5;
+
     border-radius: 5px;
 
-    font-size: 15px;
-
-    border: 1px solid #07599a;
+    color: #164a6c;
 
     background:
         linear-gradient(
             180deg,
             #ffffff,
-            #d9f2ff 45%,
-            #9bcce5 50%,
-            #d8edf7
+            #eefaff 42%,
+            #c7e8f7 52%,
+            #e8f7fc
         );
 
     box-shadow:
         inset 0 1px 0 white,
-        inset 0 -1px 0 rgba(0,0,0,.2),
-        0 1px 2px rgba(0,50,100,.3);
+        inset 0 -1px 0 rgba(40,90,120,.20),
+        0 1px 2px rgba(0,45,80,.25);
 
     cursor: pointer;
 }
 
-.theme-btn:hover {
+.theme-btn:hover,
+.icon-btn:hover {
     background:
         linear-gradient(
             180deg,
             #ffffff,
-            #eafaff,
-            #b5e4f8
+            #f4fdff,
+            #bde5f8
         );
 }
 
-.theme-btn:active {
+.theme-btn:active,
+.icon-btn:active {
     transform: translateY(1px);
 
     box-shadow:
-        inset 0 2px 3px rgba(0,0,0,.25);
+        inset 0 2px 3px rgba(0,50,80,.25);
+}
+
+
+/* ============================================================
+   WORKSPACE
+   ============================================================ */
+
+#workspace {
+    position: relative;
+
+    min-height: calc(100vh - 74px);
+
+    margin-top: 0;
+
+    padding: 7px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(230,249,255,.70),
+            rgba(255,255,255,.60)
+        );
+
+    border-left: 1px solid rgba(255,255,255,.65);
+
+    border-right: 1px solid rgba(255,255,255,.65);
+
+    border-bottom: 1px solid rgba(30,100,135,.35);
+
+    box-shadow:
+        inset 1px 0 0 rgba(255,255,255,.45),
+        inset -1px 0 0 rgba(255,255,255,.45),
+        0 3px 10px rgba(0,55,90,.22);
+}
+
+
+/* ============================================================
+   VISTAS
+   ============================================================ */
+
+.view {
+    width: 100%;
+
+    min-height:
+        calc(100vh - 88px);
+}
+
+
+/* ============================================================
+   PANELES
+   ============================================================ */
+
+.panel {
+    position: relative;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.96),
+            rgba(232,247,253,.94)
+        );
+
+    border: 1px solid #78a7bf;
+
+    border-radius: 5px;
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.95),
+        inset -1px -1px 0 rgba(90,130,150,.25),
+        0 2px 5px rgba(0,55,90,.18);
+
+    overflow: hidden;
+}
+
+.panel::before {
+    content: "";
+
+    position: absolute;
+
+    left: 2px;
+    right: 2px;
+    top: 2px;
+
+    height: 20px;
+
+    pointer-events: none;
+
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.22),
+            transparent
+        );
+
+    z-index: 2;
+}
+
+
+/* ============================================================
+   TITULO DE PANEL
+   ============================================================ */
+
+.panel-title {
+    position: relative;
+
+    z-index: 3;
+
+    min-height: 29px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 9px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            180deg,
+            #74c9f2 0%,
+            #3aa5dc 20%,
+            #1684c8 48%,
+            #0c6eb1 53%,
+            #208dca 80%,
+            #48a9d8 100%
+        );
+
+    border-bottom: 1px solid #07588e;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    letter-spacing: .7px;
+
+    text-shadow:
+        1px 1px 1px rgba(0,50,90,.65);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.50);
+}
+
+
+/* ============================================================
+   BOTONES DE TOOLBAR
+   ============================================================ */
+
+.toolbar {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 4px;
+
+    margin-bottom: 6px;
+
+    padding: 5px;
+
+    border: 1px solid #75a5be;
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.97),
+            rgba(215,239,249,.96)
+        );
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        0 2px 4px rgba(0,55,90,.15);
+}
+
+.toolbar button,
+.page-actions button {
+    appearance: none;
+
+    padding: 6px 9px;
+
+    border: 1px solid #83aabd;
+
+    border-radius: 4px;
+
+    color: #174764;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f4fbff 42%,
+            #d3eaf5 52%,
+            #e9f7fc 100%
+        );
+
+    font-size: 10px;
+
+    box-shadow:
+        inset 0 1px 0 white,
+        inset 0 -1px 0 rgba(70,110,135,.20),
+        0 1px 2px rgba(0,50,80,.16);
+
+    cursor: pointer;
+}
+
+.toolbar button:hover,
+.page-actions button:hover {
+    color: #064b7c;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #f3fdff,
+            #bfe6f8
+        );
+
+    border-color: #5597ba;
+}
+
+.toolbar button:active,
+.page-actions button:active {
+    transform: translateY(1px);
+
+    box-shadow:
+        inset 0 2px 3px rgba(0,50,80,.20);
+}
+
+.toolbar .sep {
+    width: 1px;
+
+    height: 22px;
+
+    margin: 0 2px;
+
+    background:
+        linear-gradient(
+            180deg,
+            transparent,
+            #8db1c2,
+            transparent
+        );
+}
+
+.toolbar-status {
+    margin-left: auto;
+
+    padding: 4px 7px;
+
+    color: #287317;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    border: 1px solid #a4c99a;
+
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fafff7,
+            #e2f4dc
+        );
+}
+
+
+/* ============================================================
+   PAGE HEAD
+   ============================================================ */
+
+.page-head {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 7px;
+
+    padding: 12px;
+
+    border: 1px solid #79a8bf;
+
+    border-radius: 6px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.98),
+            rgba(222,243,251,.96)
+        );
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        inset -1px -1px 0 rgba(90,130,150,.18),
+        0 2px 5px rgba(0,55,90,.17);
+}
+
+.page-head h1 {
+    margin: 2px 0 3px;
+
+    color: #075c99;
+
+    font-size: 20px;
+
+    line-height: 1.15;
+
+    text-shadow:
+        1px 1px 0 white;
+}
+
+.page-head p {
+    margin: 0;
+
+    color: #57788b;
+
+    font-size: 11px;
+}
+
+.eyebrow {
+    color: #1180bd;
+
+    font-size: 8px;
+
+    font-weight: bold;
+
+    letter-spacing: 1.1px;
+}
+
+
+/* ============================================================
+   FILE ROWS
+   ============================================================ */
+
+.file-row {
+    width: 100%;
+
+    min-height: 29px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 4px 7px;
+
+    color: #214b65;
+
+    text-align: left;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.88),
+            rgba(236,248,253,.88)
+        );
+
+    border: 0;
+
+    border-bottom: 1px solid #d0e3ec;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+.file-row:hover {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #dff4ff
+        );
+}
+
+.file-row.active {
+    color: #064f83;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e3f7ff,
+            #b9e6fa
+        );
+
+    border-bottom-color: #86bdd8;
+
+    font-weight: bold;
+
+    box-shadow:
+        inset 3px 0 0 #168bd0;
+}
+
+
+/* ============================================================
+   BOTTOM
+   ============================================================ */
+
+.bottom {
+    margin-top: 6px;
+
+    border: 1px solid #77a6bc;
+
+    border-radius: 5px;
+
+    background:
+        rgba(238,249,253,.95);
+
+    box-shadow:
+        inset 1px 1px 0 white,
+        inset -1px -1px 0 rgba(70,110,135,.18),
+        0 2px 5px rgba(0,55,90,.17);
+
+    overflow: hidden;
+}
+
+.bottom-tabs {
+    min-height: 29px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 2px;
+
+    padding: 3px 4px 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #edfaff,
+            #c9e2ed
+        );
+
+    border-bottom: 1px solid #83aabd;
+}
+
+.bottom-tabs button {
+    appearance: none;
+
+    padding: 5px 9px;
+
+    border: 1px solid #91b2c2;
+
+    border-bottom: 0;
+
+    border-radius: 4px 4px 0 0;
+
+    color: #3b6379;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #dceef6
+        );
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+.bottom-tabs button.active {
+    color: #07558b;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #f7fdff
+        );
+
+    border-color: #7ca5b8;
+
+    font-weight: bold;
+
+    box-shadow:
+        inset 0 1px 0 white;
+}
+
+.bottom-content {
+    min-height: 75px;
+
+    max-height: 240px;
+
+    overflow: auto;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fbfeff,
+            #edf7fb
+        );
+}
+
+
+/* ============================================================
+   ESTADO VACIO
+   ============================================================ */
+
+.empty-state {
+    padding: 28px 15px;
+
+    text-align: center;
+
+    color: #7090a2;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   CONSOLA
+   ============================================================ */
+
+.console-line {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 7px;
+
+    padding: 5px 8px;
+
+    border-bottom: 1px solid #d5e6ed;
+
+    color: #29495c;
+
+    font-size: 10px;
+}
+
+.console-line pre {
+    margin: 0;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 10px;
+}
+
+.console-prefix {
+    width: 13px;
+
+    flex: 0 0 13px;
+
+    text-align: center;
+
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   INSPECTOR
+   ============================================================ */
+
+.inspect-section {
+    padding: 8px;
+
+    border-bottom: 1px solid #cfe1e9;
+
+    color: #38576a;
+
+    font-size: 10px;
+}
+
+.inspect-section > b {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #0873b4;
+
+    font-size: 8px;
+
+    letter-spacing: .5px;
+}
+
+.inspect-url {
+    margin-top: 5px;
+
+    padding: 4px;
+
+    color: #47758b;
+
+    background: #e5f3f8;
+
+    border: 1px solid #c4dce6;
+
+    border-radius: 3px;
+
+    word-break: break-all;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   VARIABLES
+   ============================================================ */
+
+.variable-row {
+    padding: 5px 7px;
+
+    border-bottom: 1px solid #d1e3eb;
+
+    font-size: 10px;
+}
+
+.variable-row b {
+    color: #086ca9;
+}
+
+.variable-row pre {
+    margin: 3px 0 0;
+
+    color: #486b7e;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   RED
+   ============================================================ */
+
+.network-row {
+    display: grid;
+
+    grid-template-columns:
+        65px
+        minmax(0, 1fr)
+        45px
+        65px;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 5px 8px;
+
+    border-bottom: 1px solid #d2e4eb;
+
+    color: #35586c;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+}
+
+.network-row strong {
+    color: #0874b8;
+}
+
+
+/* ============================================================
+   ERRORES
+   ============================================================ */
+
+.error-entry {
+    padding: 7px 9px;
+
+    color: #8a3030;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fffafa,
+            #fff0f0
+        );
+
+    border-bottom: 1px solid #e6caca;
+
+    font-size: 10px;
+}
+
+.error-entry pre {
+    margin-top: 5px;
+
+    white-space: pre-wrap;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   SCROLLBAR — XP
+   ============================================================ */
+
+::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+}
+
+::-webkit-scrollbar-track {
+    background:
+        linear-gradient(
+            90deg,
+            #d5e8f1,
+            #eaf7fb
+        );
+
+    border-left: 1px solid #9dbdcc;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 1px solid #6d9bb3;
+
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #eafaff 0%,
+            #b9dce9 20%,
+            #8fb9ca 50%,
+            #c8e3ed 80%,
+            #eefaff 100%
+        );
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.85);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff,
+            #c9ebf8,
+            #8fc5dc,
+            #d9f2fa,
+            #ffffff
+        );
+}
+
+::-webkit-scrollbar-button {
+    height: 15px;
+    width: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #c8e2ed
+        );
+
+    border: 1px solid #83aabd;
+}
+
+
+/* ============================================================
+   SELECCIÓN
+   ============================================================ */
+
+::selection {
+    color: white;
+
+    background: #238fd0;
+}
+
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 1px dotted #075a91;
+
+    outline-offset: 1px;
 }
 
 
@@ -100,274 +1299,331 @@ body::before {
 
 body.dark-mode {
 
-    color: #d8e7f3;
+    color: #d7e9f2;
 
     background:
-        linear-gradient(
-            180deg,
-            #071827 0%,
-            #0b2638 40%,
-            #102d3d 70%,
-            #142f27 100%
-        );
-
-    background-attachment: fixed;
+        #071b28
+        url("../assets/frutiger-aero.png")
+        center center / cover
+        fixed
+        no-repeat;
 }
-
-
-/* Ambiente mucho más suave */
 
 body.dark-mode::before {
     background:
-        radial-gradient(
-            circle at 20% 10%,
-            rgba(70,150,200,.12),
-            transparent 28%
-        ),
-        radial-gradient(
-            circle at 80% 20%,
-            rgba(40,120,150,.08),
-            transparent 25%
+        linear-gradient(
+            180deg,
+            rgba(2,20,34,.64),
+            rgba(2,25,35,.72)
+        );
+}
+
+body.dark-mode::after {
+    background:
+        linear-gradient(
+            180deg,
+            transparent,
+            rgba(0,0,0,.30)
         );
 }
 
 
 /* ============================================================
-   BARRA XP OSCURA
+   TOP OSCURO
    ============================================================ */
 
 body.dark-mode .top {
+
     background:
         linear-gradient(
             180deg,
-            #17669a,
-            #0d4d7b 48%,
-            #083b60 52%,
-            #0d4d79
+            #237ba9,
+            #155d88 22%,
+            #0d486c 48%,
+            #093b5a 53%,
+            #104e72 82%,
+            #17658b
         );
 
-    border-bottom-color: #062d49;
+    border-color: #062e48;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.18),
-        0 2px 7px rgba(0,0,0,.45);
+        inset 0 1px 0 rgba(255,255,255,.20),
+        0 3px 9px rgba(0,0,0,.50);
+}
+
+body.dark-mode .brand {
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(100,200,240,.20),
+            rgba(0,0,0,.12)
+        );
+
+    border-color:
+        rgba(255,255,255,.18);
+}
+
+body.dark-mode #main-nav button.active {
+
+    color: #dff6ff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #316f91,
+            #1b536f
+        );
+
+    border-color: #4c88a6;
+
+    text-shadow:
+        1px 1px 1px rgba(0,0,0,.5);
 }
 
 
 /* ============================================================
-   ESPACIO PRINCIPAL
+   WORKSPACE OSCURO
    ============================================================ */
 
 body.dark-mode #workspace {
+
     background:
         linear-gradient(
             180deg,
-            rgba(8,25,38,.52),
-            rgba(5,18,28,.72)
+            rgba(5,22,33,.78),
+            rgba(4,17,26,.84)
         );
+
+    border-color: rgba(80,125,150,.35);
 }
 
 
 /* ============================================================
-   PANELES
+   PANELES OSCUROS
    ============================================================ */
 
 body.dark-mode .panel {
 
+    color: #d3e5ee;
+
     background:
         linear-gradient(
             180deg,
-            #1d3444,
-            #142936
+            #1c3443,
+            #132936
         );
 
-    border-color: #38677f;
+    border-color: #3a657b;
 
     box-shadow:
-        inset 1px 1px 0 rgba(255,255,255,.09),
-        inset -1px -1px 0 rgba(0,0,0,.4),
-        0 2px 7px rgba(0,0,0,.45);
-
-    color: #d5e5ef;
+        inset 1px 1px 0 rgba(255,255,255,.08),
+        inset -1px -1px 0 rgba(0,0,0,.45),
+        0 3px 8px rgba(0,0,0,.45);
 }
-
-
-/* ============================================================
-   TÍTULOS DE PANELES
-   ============================================================ */
 
 body.dark-mode .panel-title {
 
     background:
         linear-gradient(
             180deg,
-            #247eaf,
-            #155e89 48%,
-            #104d72 52%,
-            #17658e
+            #2c88b6,
+            #1c6b96 45%,
+            #145579 53%,
+            #1b688f
         );
 
-    border-bottom-color: #0b3d5b;
+    border-bottom-color: #0b3b57;
 }
 
 
 /* ============================================================
-   EDITOR
+   TOOLBAR OSCURA
    ============================================================ */
 
-body.dark-mode .code-panel {
+body.dark-mode .toolbar {
 
-    background: #091722;
+    background:
+        linear-gradient(
+            180deg,
+            #203d4d,
+            #172e3a
+        );
 
-    border-color: #285b76;
+    border-color: #3a667b;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.07),
-        0 3px 9px rgba(0,0,0,.5);
+        inset 1px 1px 0 rgba(255,255,255,.08),
+        0 2px 6px rgba(0,0,0,.4);
 }
-
-
-/* ============================================================
-   TAB
-   ============================================================ */
-
-body.dark-mode .tabbar {
-
-    color: #b8d8e9;
-
-    background:
-        linear-gradient(
-            180deg,
-            #203e51,
-            #172f3e
-        );
-
-    border-bottom-color: #35657d;
-}
-
-body.dark-mode .tab-path {
-    color: #7898a9;
-}
-
-
-/* ============================================================
-   STATUS
-   ============================================================ */
-
-body.dark-mode .editor-status {
-
-    background:
-        linear-gradient(
-            180deg,
-            #1a3545,
-            #132936
-        );
-
-    border-top-color: #31596e;
-
-    color: #91b1c2;
-}
-
-
-/* ============================================================
-   BOTONES NORMALES
-   ============================================================ */
 
 body.dark-mode .toolbar button,
-body.dark-mode .page-actions button,
-body.dark-mode .icon-btn,
-body.dark-mode .file-row,
-body.dark-mode .bottom-tabs button,
-body.dark-mode .theme-btn {
+body.dark-mode .page-actions button {
 
-    color: #cce5f2;
+    color: #d2e8f2;
 
     background:
         linear-gradient(
             180deg,
-            #315264,
-            #263f4f 45%,
-            #1c3442 50%,
-            #294757
+            #38576a,
+            #2a4556 48%,
+            #203946 53%,
+            #304e60
         );
 
-    border-color: #416d82;
+    border-color: #4a7082;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.15),
-        inset 0 -1px 0 rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.13),
         0 1px 2px rgba(0,0,0,.4);
 }
 
 body.dark-mode .toolbar button:hover,
-body.dark-mode .page-actions button:hover,
-body.dark-mode .icon-btn:hover,
-body.dark-mode .file-row:hover,
-body.dark-mode .bottom-tabs button:hover,
-body.dark-mode .theme-btn:hover {
+body.dark-mode .page-actions button:hover {
 
     background:
         linear-gradient(
             180deg,
-            #3d657a,
-            #315366,
-            #274655
+            #466a7e,
+            #35576a,
+            #294755
         );
-
-    border-color: #5790ac;
 }
 
+body.dark-mode .toolbar-status {
 
-/* ============================================================
-   BOTÓN EJECUTAR
-   ============================================================ */
-
-body.dark-mode button.primary {
+    color: #83dc68;
 
     background:
         linear-gradient(
             180deg,
-            #75c93d,
-            #4d9e20 48%,
-            #397b16 52%,
-            #4b9d1d
+            #203c25,
+            #162c1b
         );
 
-    border-color: #2d6810;
+    border-color: #416d3b;
 }
 
 
 /* ============================================================
-   FILA ACTIVA
+   BOTONES OSCUROS
    ============================================================ */
+
+body.dark-mode .theme-btn,
+body.dark-mode .icon-btn {
+
+    color: #d7edf7;
+
+    background:
+        linear-gradient(
+            180deg,
+            #3b5d6e,
+            #2b4858 50%,
+            #213c4a
+        );
+
+    border-color: #4b7183;
+}
+
+
+/* ============================================================
+   PAGE HEAD OSCURO
+   ============================================================ */
+
+body.dark-mode .page-head {
+
+    background:
+        linear-gradient(
+            180deg,
+            #213d4d,
+            #172f3c
+        );
+
+    border-color: #3d697e;
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,.08),
+        0 3px 7px rgba(0,0,0,.4);
+}
+
+body.dark-mode .page-head h1 {
+
+    color: #74caf1;
+
+    text-shadow:
+        1px 1px 2px #06141d;
+}
+
+body.dark-mode .page-head p {
+
+    color: #91acb9;
+}
+
+body.dark-mode .eyebrow {
+
+    color: #55b9e8;
+}
+
+
+/* ============================================================
+   FILAS OSCURAS
+   ============================================================ */
+
+body.dark-mode .file-row {
+
+    color: #c8dce6;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1b3442,
+            #172d39
+        );
+
+    border-bottom-color: #294654;
+}
+
+body.dark-mode .file-row:hover {
+
+    background:
+        linear-gradient(
+            180deg,
+            #294d61,
+            #234254
+        );
+}
 
 body.dark-mode .file-row.active {
 
-    color: #e5f6ff;
+    color: #e2f5ff;
 
     background:
         linear-gradient(
             180deg,
-            #236f9d,
-            #17577e
+            #24698f,
+            #1a536f
         );
 
-    border-bottom-color: #317da8;
+    border-bottom-color: #377b9d;
+
+    box-shadow:
+        inset 3px 0 0 #55bce9;
 }
 
 
 /* ============================================================
-   BOTTOM
+   BOTTOM OSCURO
    ============================================================ */
 
 body.dark-mode .bottom {
 
-    background: #132936;
+    background: #142a36;
 
-    border-color: #38677f;
+    border-color: #3a6579;
 
     box-shadow:
-        inset 1px 1px 0 rgba(255,255,255,.08),
+        inset 1px 1px 0 rgba(255,255,255,.07),
         0 3px 8px rgba(0,0,0,.45);
 }
 
@@ -376,87 +1632,108 @@ body.dark-mode .bottom-tabs {
     background:
         linear-gradient(
             180deg,
-            #254555,
-            #1a3442
+            #284656,
+            #1b3543
         );
 
-    border-bottom-color: #355b70;
+    border-bottom-color: #3b6274;
 }
 
-body.dark-mode .bottom-tabs button.active {
+body.dark-mode .bottom-tabs button {
 
-    color: #d7f1ff;
+    color: #a9c5d1;
 
     background:
         linear-gradient(
             180deg,
-            #315d73,
-            #24485b
+            #304f60,
+            #233f4e
         );
 
-    border-color: #4d8199;
+    border-color: #44697a;
 }
 
+body.dark-mode .bottom-tabs button.active {
 
-/* ============================================================
-   CONTENIDO INFERIOR
-   ============================================================ */
+    color: #d9f3ff;
+
+    background:
+        linear-gradient(
+            180deg,
+            #345e72,
+            #294c5e
+        );
+}
 
 body.dark-mode .bottom-content {
 
     background:
         linear-gradient(
             180deg,
-            #112532,
-            #0e202b
+            #10232e,
+            #0d1e28
         );
 }
 
 
 /* ============================================================
-   CONSOLA
+   CONTENIDO OSCURO
    ============================================================ */
 
-body.dark-mode .console-line {
+body.dark-mode .console-line,
+body.dark-mode .variable-row,
+body.dark-mode .network-row {
 
-    border-bottom-color: #203b4a;
+    border-bottom-color: #294653;
 
-    color: #c8dce7;
+    color: #bdd1dc;
 }
 
+body.dark-mode .variable-row b,
+body.dark-mode .inspect-section > b,
+body.dark-mode .network-row strong {
 
-/* ============================================================
-   VARIABLES
-   ============================================================ */
-
-body.dark-mode .variable-row {
-
-    border-bottom-color: #284554;
-}
-
-body.dark-mode .variable-row b {
-
-    color: #62b9e8;
+    color: #5ebde9;
 }
 
 body.dark-mode .variable-row pre {
 
-    color: #aec7d4;
+    color: #9eb8c5;
+}
+
+body.dark-mode .inspect-section {
+
+    color: #b9cfd9;
+
+    border-bottom-color: #294653;
+}
+
+body.dark-mode .inspect-url {
+
+    color: #9bb7c4;
+
+    background: #193442;
+
+    border-color: #315567;
 }
 
 
 /* ============================================================
-   INSPECTOR
+   ERRORES OSCUROS
    ============================================================ */
 
-body.dark-mode .inspect-section {
+body.dark-mode .error-entry {
 
-    border-bottom-color: #284554;
-}
+    color: #ffb6bc;
 
-body.dark-mode .inspect-section > b {
+    background:
+        linear-gradient(
+            180deg,
+            #3b2227,
+            #301b20
+        );
 
-    color: #59b5e7;
+    border-bottom-color: #5b3439;
 }
 
 
@@ -464,99 +1741,54 @@ body.dark-mode .inspect-section > b {
    AST
    ============================================================ */
 
+#astInfo {
+
+    margin: 0;
+
+    padding: 5px;
+
+    max-height: 300px;
+
+    overflow: auto;
+
+    color: #41677b;
+
+    white-space: pre-wrap;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+}
+
 body.dark-mode #astInfo {
 
-    color: #a9c7d7;
+    color: #9dbac7;
 }
 
 
 /* ============================================================
-   RED
-   ============================================================ */
-
-body.dark-mode .network-row {
-
-    border-bottom-color: #294653;
-
-    color: #c7dce7;
-}
-
-body.dark-mode .network-row strong {
-
-    color: #55b9eb;
-}
-
-
-/* ============================================================
-   ERRORES
-   ============================================================ */
-
-body.dark-mode .error-entry {
-
-    background: #351d21;
-
-    border-bottom-color: #61363b;
-
-    color: #ffb7bd;
-}
-
-
-/* ============================================================
-   PÁGINAS
-   ============================================================ */
-
-body.dark-mode .page-head {
-
-    background:
-        linear-gradient(
-            180deg,
-            #203b4c,
-            #172f3d
-        );
-
-    border-color: #3d6d83;
-
-    box-shadow:
-        inset 1px 1px 0 rgba(255,255,255,.08),
-        0 2px 6px rgba(0,0,0,.4);
-}
-
-body.dark-mode .page-head h1 {
-
-    color: #6fc5f2;
-
-    text-shadow:
-        1px 1px 0 #071722;
-}
-
-body.dark-mode .page-head p {
-
-    color: #91adbc;
-}
-
-body.dark-mode .eyebrow {
-
-    color: #54b9e9;
-}
-
-
-/* ============================================================
-   EMPTY
+   EMPTY OSCURO
    ============================================================ */
 
 body.dark-mode .empty-state {
 
-    color: #789aaa;
+    color: #7594a2;
 }
 
 
 /* ============================================================
-   SCROLLBAR
+   SCROLLBAR OSCURA
    ============================================================ */
 
 body.dark-mode ::-webkit-scrollbar-track {
 
-    background: #102633;
+    background:
+        #122934;
+
+    border-left-color: #294957;
 }
 
 body.dark-mode ::-webkit-scrollbar-thumb {
@@ -564,48 +1796,205 @@ body.dark-mode ::-webkit-scrollbar-thumb {
     background:
         linear-gradient(
             90deg,
-            #31586b,
-            #244758
+            #456778,
+            #2e5264,
+            #456778
         );
 
-    border-color: #416b7d;
+    border-color: #507386;
+}
+
+body.dark-mode ::-webkit-scrollbar-button {
+
+    background:
+        linear-gradient(
+            135deg,
+            #3d5b6a,
+            #263f4d
+        );
+
+    border-color: #456879;
 }
 
 
 /* ============================================================
-   SELECCIÓN
-   ============================================================ */
-
-body.dark-mode ::selection {
-
-    background: #176e9d;
-
-    color: #ffffff;
-}
-
-
-/* ============================================================
-   TRANSICIONES SUAVES
+   TRANSICIONES
    ============================================================ */
 
 body,
 .top,
+#workspace,
 .panel,
+.panel-title,
+.toolbar,
+.toolbar button,
 .page-head,
-.code-panel,
-.tabbar,
-.editor-status,
+.file-row,
 .bottom,
 .bottom-tabs,
+.bottom-tabs button,
 .bottom-content,
-.toolbar button,
-.page-actions button,
-.file-row,
-.theme-btn {
+.theme-btn,
+.icon-btn {
 
     transition:
-        background .25s ease,
-        color .25s ease,
-        border-color .25s ease,
-        box-shadow .25s ease;
+        background .22s ease,
+        border-color .22s ease,
+        color .22s ease,
+        box-shadow .22s ease;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    #app {
+        padding: 5px;
+    }
+
+    .brand {
+        min-width: auto;
+    }
+
+    .brand > span:not(.brand-mark) {
+        font-size: 16px;
+    }
+
+    .brand small {
+        display: none;
+    }
+
+    #main-nav {
+        gap: 1px;
+    }
+
+    #main-nav button {
+        padding: 7px 8px;
+    }
+}
+
+
+@media (max-width: 720px) {
+
+    .top {
+        min-height: 52px;
+
+        border-radius: 5px;
+    }
+
+    .brand {
+        flex: 1;
+
+        min-width: 0;
+    }
+
+    .brand > span:not(.brand-mark) {
+        font-size: 15px;
+    }
+
+    #main-nav {
+        display: none;
+
+        position: absolute;
+
+        left: 5px;
+        right: 5px;
+
+        top: 56px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        padding: 5px;
+
+        border: 1px solid #07518e;
+
+        border-radius: 5px;
+
+        background:
+            linear-gradient(
+                180deg,
+                #2999d7,
+                #0866ad
+            );
+
+        box-shadow:
+            0 4px 10px rgba(0,40,80,.40);
+    }
+
+    #main-nav.mobile-open {
+        display: flex;
+    }
+
+    #main-nav button {
+        width: 100%;
+
+        text-align: left;
+    }
+
+    #workspace {
+        padding: 5px;
+    }
+
+    .toolbar {
+        gap: 3px;
+    }
+
+    .toolbar .sep {
+        display: none;
+    }
+
+    .toolbar-status {
+        margin-left: 0;
+    }
+
+    .page-head {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .network-row {
+        grid-template-columns:
+            55px
+            minmax(0, 1fr)
+            40px;
+    }
+
+    .network-row span:last-child {
+        display: none;
+    }
+}
+
+
+@media (max-width: 450px) {
+
+    .top-actions {
+        gap: 3px;
+    }
+
+    .theme-btn,
+    .icon-btn {
+        width: 32px;
+        height: 30px;
+    }
+
+    button.primary {
+        padding: 6px 9px;
+    }
+
+    .brand-mark {
+        width: 32px;
+        height: 32px;
+
+        flex-basis: 32px;
+    }
+
+    .brand > span:not(.brand-mark) {
+        font-size: 14px;
+    }
 }
