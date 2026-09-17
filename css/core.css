@@ -229,3 +229,54 @@ nav button.active {
         padding: 10px;
     }
 }
+
+/* ============================================================
+   PANTALLA DE INICIO
+   ============================================================ */
+
+.boot-screen {
+    min-height: calc(100vh - 54px);
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    color: #9da6b0;
+
+    font-family:
+        Arial,
+        sans-serif;
+}
+
+.boot-logo {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #6d7782;
+
+    background: #30363d;
+
+    box-shadow:
+        inset 1px 1px 0 #aeb6bd,
+        inset -1px -1px 0 #11151a;
+
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.boot-screen strong {
+    color: #e3e7ea;
+    font-size: 18px;
+}
+
+.boot-screen span {
+    font-size: 12px;
+}
