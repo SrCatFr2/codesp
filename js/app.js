@@ -7,6 +7,7 @@
 import { tokenizar } from "./lexer.js";
 import { parse } from "./parser.js";
 import { Runtime } from "./runtime.js";
+
 import {
     loadProject,
     saveProject,
@@ -43,7 +44,9 @@ const state = {
 
     network: [],
 
-    activePanel: "console"
+    activePanel: "console",
+
+    lastResponse: null
 };
 
 
@@ -82,28 +85,165 @@ document.addEventListener(
 
 async function init() {
 
-    state.project = loadProject();
+    try {
 
-    if (!state.project) {
+        // ------------------------------------------
+        // CARGAR PROYECTO
+        // ------------------------------------------
+
+        state.project = loadProject();
+
+        // Protección contra proyecto inválido
+        if (
+            !state.project ||
+            typeof state.project !== "object"
+        ) {
+            state.project = crearProyectoSeguro();
+        }
+
+        // Protección contra files inexistente
+        if (
+            !state.project.files ||
+            typeof state.project.files !== "object" ||
+            Array.isArray(state.project.files)
+        ) {
+            state.project.files = {
+                "principal.codesp": ""
+            };
+        }
+
+        // Si no hay ningún archivo
+        if (
+            Object.keys(state.project.files).length === 0
+        ) {
+            state.project.files = {
+                "principal.codesp": ""
+            };
+        }
+
+        // ------------------------------------------
+        // ARCHIVO ACTIVO
+        // ------------------------------------------
+
+        const files =
+            obtenerArchivos();
+
+        if (
+            !state.project.active ||
+            !Object.prototype.hasOwnProperty.call(
+                state.project.files,
+                state.project.active
+            )
+        ) {
+            state.project.active =
+                files[0] ||
+                "principal.codesp";
+        }
+
+        state.currentFile =
+            state.project.active;
+
+        saveProject(state.project);
+
+        // ------------------------------------------
+        // CONFIGURAR UI
+        // ------------------------------------------
+
+        setupNavigation();
+
+        setupMobileMenu();
+
+        setupTopRunButton();
+
+        setupFilePickers();
+
+        // ------------------------------------------
+        // CARGAR EDITOR
+        // ------------------------------------------
+
+        await loadView("editor");
+
+    } catch (error) {
+
         console.error(
-            "CodEsp: no se pudo cargar el proyecto."
+            "CodEsp: error durante el inicio:",
+            error
         );
 
-        return;
+        if (workspace) {
+
+            workspace.innerHTML = `
+                <section class="view generic-view">
+
+                    <div class="panel">
+
+                        <div class="panel-title">
+                            ERROR DE INICIO
+                        </div>
+
+                        <p>
+                            CodEsp no pudo iniciar correctamente.
+                        </p>
+
+                        <pre>${escapeHTML(
+                            error?.stack ||
+                            error?.message ||
+                            String(error)
+                        )}</pre>
+
+                    </div>
+
+                </section>
+            `;
+        }
+    }
+}
+
+
+// ============================================================
+// PROYECTO SEGURO
+// ============================================================
+
+function crearProyectoSeguro() {
+
+    return {
+
+        name: "MiProyecto",
+
+        version: "0.3.0",
+
+        active: "principal.codesp",
+
+        files: {
+
+            "principal.codesp":
+`# CodEsp
+
+mostrar "Hola desde CodEsp"
+`
+        }
+    };
+}
+
+
+// ============================================================
+// OBTENER ARCHIVOS
+// ============================================================
+
+function obtenerArchivos() {
+
+    if (
+        !state.project ||
+        !state.project.files ||
+        typeof state.project.files !== "object" ||
+        Array.isArray(state.project.files)
+    ) {
+        return [];
     }
 
-    state.currentFile =
-        state.project.active ||
-        Object.keys(state.project.files)[0] ||
-        "principal.codesp";
-
-    setupNavigation();
-
-    setupMobileMenu();
-
-    setupFilePickers();
-
-    await loadView("editor");
+    return Object.keys(
+        state.project.files
+    );
 }
 
 
@@ -157,13 +297,14 @@ async function loadView(view) {
 
         const response =
             await fetch(
-                `views/${view}.html?v=0.3.1`,
+                `views/${view}.html?v=0.3.2`,
                 {
                     cache: "no-store"
                 }
             );
 
         if (!response.ok) {
+
             throw new Error(
                 `HTTP ${response.status}`
             );
@@ -262,6 +403,32 @@ function setupMobileMenu() {
 
 
 // ============================================================
+// BOTÓN EJECUTAR SUPERIOR
+// ============================================================
+
+function setupTopRunButton() {
+
+    if (!runTop) return;
+
+    runTop.addEventListener(
+        "click",
+        async () => {
+
+            // Si estamos fuera del editor,
+            // primero regresamos al editor.
+
+            if (state.view !== "editor") {
+
+                await loadView("editor");
+            }
+
+            runCode();
+        }
+    );
+}
+
+
+// ============================================================
 // EDITOR
 // ============================================================
 
@@ -271,6 +438,15 @@ function initEditor() {
         document.getElementById("code");
 
     if (!editor) return;
+
+    // Protección adicional
+    if (
+        !state.project ||
+        !state.project.files
+    ) {
+        state.project =
+            crearProyectoSeguro();
+    }
 
     const content =
         state.project.files[
@@ -286,6 +462,7 @@ function initEditor() {
         );
 
     if (currentTab) {
+
         currentTab.textContent =
             state.currentFile;
     }
@@ -315,7 +492,6 @@ function setupEditorEvents() {
 
     if (!editor) return;
 
-
     editor.addEventListener(
         "input",
         () => {
@@ -327,24 +503,20 @@ function setupEditorEvents() {
         }
     );
 
-
     editor.addEventListener(
         "scroll",
         syncScroll
     );
-
 
     editor.addEventListener(
         "keyup",
         updateCursor
     );
 
-
     editor.addEventListener(
         "click",
         updateCursor
     );
-
 
     editor.addEventListener(
         "keydown",
@@ -380,7 +552,6 @@ function setupEditorEvents() {
                 updateEditor();
             }
 
-
             // CTRL + S
             if (
                 (event.ctrlKey ||
@@ -398,7 +569,6 @@ function setupEditorEvents() {
                 );
             }
 
-
             // CTRL + ENTER
             if (
                 (event.ctrlKey ||
@@ -410,7 +580,6 @@ function setupEditorEvents() {
 
                 runCode();
             }
-
         }
     );
 }
@@ -470,7 +639,6 @@ function setupEditorButtons() {
         createPlugin
     );
 
-
     document
         .querySelectorAll(
             ".bottom-tabs button"
@@ -502,7 +670,6 @@ function setupEditorButtons() {
                     renderBottomPanel();
                 }
             );
-
         });
 }
 
@@ -540,7 +707,18 @@ function saveCurrentFile() {
 
     if (!editor) return;
 
-    if (!state.project.files) {
+    if (
+        !state.project ||
+        typeof state.project !== "object"
+    ) {
+        state.project =
+            crearProyectoSeguro();
+    }
+
+    if (
+        !state.project.files ||
+        typeof state.project.files !== "object"
+    ) {
         state.project.files = {};
     }
 
@@ -572,9 +750,10 @@ function renderFileTree() {
 
     tree.innerHTML = "";
 
-    Object.keys(
-        state.project.files
-    ).forEach(name => {
+    const files =
+        obtenerArchivos();
+
+    files.forEach(name => {
 
         const button =
             document.createElement(
@@ -588,6 +767,7 @@ function renderFileTree() {
             name ===
             state.currentFile
         ) {
+
             button.classList.add(
                 "active"
             );
@@ -595,6 +775,7 @@ function renderFileTree() {
 
         button.innerHTML = `
             <span>▤</span>
+
             <span>
                 ${escapeHTML(name)}
             </span>
@@ -619,6 +800,13 @@ async function openFile(name) {
     saveCurrentFile();
 
     if (
+        !state.project ||
+        !state.project.files
+    ) {
+        return;
+    }
+
+    if (
         !Object.prototype.hasOwnProperty.call(
             state.project.files,
             name
@@ -627,9 +815,11 @@ async function openFile(name) {
         return;
     }
 
-    state.currentFile = name;
+    state.currentFile =
+        name;
 
-    state.project.active = name;
+    state.project.active =
+        name;
 
     saveProject(
         state.project
@@ -662,6 +852,8 @@ async function openFile(name) {
     renderFileTree();
 
     updateEditor();
+
+    updateInspector();
 }
 
 
@@ -705,9 +897,11 @@ function createNewFile() {
         ""
     );
 
-    state.currentFile = name;
+    state.currentFile =
+        name;
 
-    state.project.active = name;
+    state.project.active =
+        name;
 
     saveProject(
         state.project
@@ -772,9 +966,11 @@ function createPlugin() {
         content
     );
 
-    state.currentFile = file;
+    state.currentFile =
+        file;
 
-    state.project.active = file;
+    state.project.active =
+        file;
 
     saveProject(
         state.project
@@ -791,11 +987,13 @@ function createPlugin() {
 async function runCode() {
 
     const editor =
-        document.getElementById(
-            "code"
-        );
+        document.getElementById("code");
 
     if (!editor) return;
+
+    if (state.running) {
+        return;
+    }
 
     saveCurrentFile();
 
@@ -804,6 +1002,8 @@ async function runCode() {
     state.network = [];
 
     state.console = [];
+
+    state.lastResponse = null;
 
     state.running = true;
 
@@ -842,25 +1042,14 @@ async function runCode() {
         // PARSER
         // ----------------------------------------------------
 
-        setCompileState(
-            "ANALIZANDO"
-        );
-
-        /*
-         * Tu parser recibe:
-         *
-         * parse(source, tokens)
-         *
-         * No analizar(tokens).
-         */
-
         const ast =
             parse(
                 source,
                 tokens
             );
 
-        state.ast = ast;
+        state.ast =
+            ast;
 
         showAST(ast);
 
@@ -883,7 +1072,6 @@ async function runCode() {
                             message,
                             type
                         );
-
                     },
 
                 onNetwork:
@@ -897,6 +1085,7 @@ async function runCode() {
                             state.network.length >
                             100
                         ) {
+
                             state.network.pop();
                         }
 
@@ -909,6 +1098,7 @@ async function runCode() {
                             state.activePanel ===
                             "network"
                         ) {
+
                             renderBottomPanel();
                         }
                     },
@@ -919,7 +1109,6 @@ async function runCode() {
                         renderVariables(
                             variables
                         );
-
                     }
             });
 
@@ -932,7 +1121,8 @@ async function runCode() {
             ast
         );
 
-        state.running = false;
+        state.running =
+            false;
 
         setCompileState(
             "LISTO"
@@ -947,9 +1137,11 @@ async function runCode() {
 
     } catch (error) {
 
-        state.running = false;
+        state.running =
+            false;
 
         state.errors.push({
+
             message:
                 error?.message ||
                 String(error),
@@ -995,7 +1187,8 @@ function stopCode() {
         state.runtime.stop();
     }
 
-    state.running = false;
+    state.running =
+        false;
 
     setCompileState(
         "DETENIDO"
@@ -1020,7 +1213,8 @@ function setCompileState(text) {
         );
 
     if (element) {
-        element.textContent = text;
+        element.textContent =
+            text;
     }
 }
 
@@ -1063,8 +1257,11 @@ function showConsole(
     }
 
     state.console.push({
+
         text,
+
         type,
+
         date: new Date()
     });
 
@@ -1072,6 +1269,7 @@ function showConsole(
         state.console.length >
         500
     ) {
+
         state.console.shift();
     }
 
@@ -1079,6 +1277,7 @@ function showConsole(
         state.activePanel ===
         "console"
     ) {
+
         renderBottomPanel();
     }
 }
@@ -1096,6 +1295,11 @@ function renderBottomPanel() {
         );
 
     if (!content) return;
+
+
+    // ------------------------------------------
+    // CONSOLA
+    // ------------------------------------------
 
     if (
         state.activePanel ===
@@ -1116,6 +1320,7 @@ function renderBottomPanel() {
         content.innerHTML =
             state.console
                 .map(item => `
+
                     <div class="console-line ${
                         escapeHTML(item.type)
                     }">
@@ -1131,12 +1336,17 @@ function renderBottomPanel() {
                         )}</pre>
 
                     </div>
+
                 `)
                 .join("");
 
         return;
     }
 
+
+    // ------------------------------------------
+    // RED
+    // ------------------------------------------
 
     if (
         state.activePanel ===
@@ -1157,6 +1367,7 @@ function renderBottomPanel() {
         content.innerHTML =
             state.network
                 .map(item => `
+
                     <div class="network-row">
 
                         <strong>
@@ -1191,12 +1402,17 @@ function renderBottomPanel() {
                         </span>
 
                     </div>
+
                 `)
                 .join("");
 
         return;
     }
 
+
+    // ------------------------------------------
+    // ERRORES
+    // ------------------------------------------
 
     if (
         state.activePanel ===
@@ -1217,6 +1433,7 @@ function renderBottomPanel() {
         content.innerHTML =
             state.errors
                 .map(error => `
+
                     <div class="error-entry">
 
                         <strong>
@@ -1236,6 +1453,7 @@ function renderBottomPanel() {
                         }
 
                     </div>
+
                 `)
                 .join("");
     }
@@ -1245,10 +1463,15 @@ function renderBottomPanel() {
 function consoleIcon(type) {
 
     const icons = {
+
         log: "›",
+
         info: "i",
+
         success: "✓",
+
         warning: "!",
+
         error: "×"
     };
 
@@ -1273,11 +1496,8 @@ function renderVariables(
 
     if (
         !variables ||
-        typeof variables !==
-        "object" ||
-        !Object.keys(
-            variables
-        ).length
+        typeof variables !== "object" ||
+        !Object.keys(variables).length
     ) {
 
         element.textContent =
@@ -1287,48 +1507,43 @@ function renderVariables(
     }
 
     element.innerHTML =
-        Object.entries(
-            variables
-        )
-        .map(
-            ([name, value]) => {
+        Object.entries(variables)
+            .map(
+                ([name, value]) => {
 
-                let text;
+                    let text;
 
-                try {
+                    try {
 
-                    text =
-                        typeof value ===
-                        "object"
-                            ? JSON.stringify(
-                                value,
-                                null,
-                                2
-                            )
-                            : String(value);
+                        text =
+                            typeof value === "object"
+                                ? JSON.stringify(
+                                    value,
+                                    null,
+                                    2
+                                )
+                                : String(value);
 
-                } catch {
+                    } catch {
 
-                    text =
-                        "[objeto]";
+                        text =
+                            "[objeto]";
+                    }
+
+                    return `
+                        <div class="variable-row">
+
+                            <b>
+                                ${escapeHTML(name)}
+                            </b>
+
+                            <pre>${escapeHTML(text)}</pre>
+
+                        </div>
+                    `;
                 }
-
-                return `
-                    <div class="variable-row">
-
-                        <b>
-                            ${escapeHTML(name)}
-                        </b>
-
-                        <pre>
-                            ${escapeHTML(text)}
-                        </pre>
-
-                    </div>
-                `;
-            }
-        )
-        .join("");
+            )
+            .join("");
 }
 
 
@@ -1346,7 +1561,6 @@ function updateInspector() {
             state.runtime.env
         );
     }
-
 
     const request =
         document.getElementById(
@@ -1367,6 +1581,7 @@ function updateInspector() {
     }
 
     request.innerHTML = `
+
         <div>
             Método:
             <b>
@@ -1405,6 +1620,7 @@ function updateInspector() {
                 last.url || ""
             )}
         </div>
+
     `;
 }
 
@@ -1462,7 +1678,6 @@ function updateEditor() {
             "gutter"
         );
 
-
     if (highlight) {
 
         highlight.innerHTML =
@@ -1470,7 +1685,6 @@ function updateEditor() {
                 editor.value
             );
     }
-
 
     if (gutter) {
 
@@ -1494,7 +1708,6 @@ function updateEditor() {
             ).join("");
     }
 
-
     updateCursor();
 
     syncScroll();
@@ -1512,9 +1725,7 @@ function highlightCode(source) {
     let html =
         escapeHTML(source);
 
-    /*
-     * Comentarios
-     */
+    // Comentarios
 
     html =
         html.replace(
@@ -1522,10 +1733,7 @@ function highlightCode(source) {
             "$1<span class=\"tok comment\">$2</span>"
         );
 
-
-    /*
-     * Strings
-     */
+    // Strings
 
     html =
         html.replace(
@@ -1533,12 +1741,10 @@ function highlightCode(source) {
             '<span class="tok string">$1</span>'
         );
 
-
-    /*
-     * Palabras clave
-     */
+    // Palabras clave
 
     const keywords = [
+
         "usar",
         "importar",
         "definir",
@@ -1562,7 +1768,6 @@ function highlightCode(source) {
         "enviar"
     ];
 
-
     const keywordPattern =
         new RegExp(
             `\\b(${keywords.join("|")})\\b`,
@@ -1575,10 +1780,7 @@ function highlightCode(source) {
             '<span class="tok keyword">$1</span>'
         );
 
-
-    /*
-     * Métodos HTTP
-     */
+    // Métodos HTTP
 
     html =
         html.replace(
@@ -1586,17 +1788,13 @@ function highlightCode(source) {
             '<span class="tok http">$1</span>'
         );
 
-
-    /*
-     * Números
-     */
+    // Números
 
     html =
         html.replace(
             /\b\d+(?:\.\d+)?\b/g,
             '<span class="tok number">$&</span>'
         );
-
 
     return html;
 }
@@ -1814,7 +2012,7 @@ function initPlugins() {
 
     const plugins =
         Object.entries(
-            state.project.files
+            state.project?.files || {}
         )
         .filter(
             ([name]) =>
@@ -1853,11 +2051,10 @@ function initPlugins() {
 
                             <span>
                                 ${escapeHTML(
-                                    name
-                                        .replace(
-                                            "plugins/",
-                                            ""
-                                        )
+                                    name.replace(
+                                        "plugins/",
+                                        ""
+                                    )
                                 )}
                             </span>
 
@@ -1901,7 +2098,6 @@ function initPlugins() {
                             `;
                         }
                     );
-
                 }
             );
     }
@@ -1938,7 +2134,6 @@ function installPlugin() {
     input.accept =
         ".codesp,text/plain";
 
-
     input.addEventListener(
         "change",
         async () => {
@@ -1968,7 +2163,6 @@ function installPlugin() {
                 )
                     ? name
                     : `plugins/${name}`;
-
 
             if (
                 state.project.files[path]
@@ -2018,38 +2212,47 @@ function initFiles() {
     if (container) {
 
         const files =
-            Object.keys(
-                state.project.files
-            );
+            obtenerArchivos();
 
-        container.innerHTML =
-            files
-                .map(
-                    name => `
+        if (!files.length) {
 
-                        <div class="file-row">
+            container.innerHTML = `
+                <div class="empty-state">
+                    No hay archivos.
+                </div>
+            `;
 
-                            <span>▤</span>
+        } else {
 
-                            <span class="file-name">
-                                ${escapeHTML(
-                                    name
-                                )}
-                            </span>
+            container.innerHTML =
+                files
+                    .map(
+                        name => `
 
-                            <button
-                                data-open-file="${escapeHTML(
-                                    name
-                                )}"
-                            >
-                                Abrir
-                            </button>
+                            <div class="file-row">
 
-                        </div>
+                                <span>▤</span>
 
-                    `
-                )
-                .join("");
+                                <span class="file-name">
+                                    ${escapeHTML(
+                                        name
+                                    )}
+                                </span>
+
+                                <button
+                                    data-open-file="${escapeHTML(
+                                        name
+                                    )}"
+                                >
+                                    Abrir
+                                </button>
+
+                            </div>
+
+                        `
+                    )
+                    .join("");
+        }
 
 
         container
@@ -2070,7 +2273,6 @@ function initFiles() {
 
                         }
                     );
-
                 }
             );
     }
@@ -2137,7 +2339,8 @@ function setupFilePickers() {
                     "editor"
                 );
 
-                filePicker.value = "";
+                filePicker.value =
+                    "";
             }
         );
     }
@@ -2184,7 +2387,8 @@ function setupFilePickers() {
                     "editor"
                 );
 
-                projectPicker.value = "";
+                projectPicker.value =
+                    "";
             }
         );
     }
@@ -2219,7 +2423,8 @@ function downloadText(
             "a"
         );
 
-    link.href = url;
+    link.href =
+        url;
 
     link.download =
         filename;
@@ -2276,17 +2481,23 @@ function escapeHTML(value) {
 
 window.CodEsp = {
 
-    run: runCode,
+    run:
+        runCode,
 
-    stop: stopCode,
+    stop:
+        stopCode,
 
-    open: openFile,
+    open:
+        openFile,
 
-    save: saveCurrentFile,
+    save:
+        saveCurrentFile,
 
-    newFile: createNewFile,
+    newFile:
+        createNewFile,
 
-    view: loadView,
+    view:
+        loadView,
 
     importCurl,
 
